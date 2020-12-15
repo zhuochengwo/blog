@@ -28,7 +28,7 @@
 <meta property="og:description" content="对于日志管理，特别是日志文件比较大的时候我们一般都需要转储整理，这里介绍一个非常强大的工具logrotate，我们可以利用它来对日志文件进行统一归档管理。可以根据日志文件的大小，也可以根据其天数来转储。 ubuntu默认已经安装logrotate，logrotate的配置文件是&#x2F;etc&#x2F;logrotate.conf，通常不需要对它进行修改。日志文件的轮循设置在独立的配置文件中，它们放在&#x2F;etc&#x2F;l">
 <meta property="og:locale">
 <meta property="article:published_time" content="2018-06-01T13:38:31.000Z">
-<meta property="article:modified_time" content="2020-12-15T05:45:28.651Z">
+<meta property="article:modified_time" content="2020-12-15T06:45:39.771Z">
 <meta property="article:author" content="Chengfeng">
 <meta property="article:tag" content="Ubuntu">
 <meta name="twitter:card" content="summary">
@@ -181,7 +181,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
+                <time title="Modified: 2020-12-15 14:45:39" itemprop="dateModified" datetime="2020-12-15T14:45:39+08:00">2020-12-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -228,7 +228,9 @@
 <p>执行后可以看到已经进行了归档。 logrotate需要的<strong>cron</strong>任务应该在安装时就自动创建了，我们不需要做额外的操作</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/cron.daily/logrotate </span><br></pre></td></tr></table></figure>
 
-<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/<span class="keyword">sh</span></span><br><span class="line"></span><br><span class="line"># Clean non existent <span class="built_in">log</span> <span class="keyword">file</span> entries from status <span class="keyword">file</span></span><br><span class="line"><span class="keyword">cd</span> /var/lib/logrotate</span><br><span class="line">test -<span class="keyword">e</span> status  touch status</span><br><span class="line">head -<span class="number">1</span> status &gt; status.clean</span><br><span class="line">sed <span class="string">&#x27;s/&quot;//g&#x27;</span> status  <span class="keyword">while</span> <span class="keyword">read</span> logfile date</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    [ -<span class="keyword">e</span> <span class="string">&quot;$logfile&quot;</span> ] &amp;&amp; <span class="keyword">echo</span> <span class="string">&quot;\&quot;$logfile\&quot; $date&quot;</span></span><br><span class="line">done &gt;&gt; status.clean</span><br><span class="line">mv status.clean status</span><br><span class="line"></span><br><span class="line">test -<span class="keyword">x</span> /usr/sbin/logrotate  <span class="keyword">exit</span> <span class="number">0</span></span><br><span class="line">/usr/sbin/logrotate /etc/logrotate.<span class="keyword">conf</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Clean non existent log file entries from status file</span></span><br><span class="line"><span class="built_in">cd</span> /var/lib/logrotate</span><br><span class="line"><span class="built_in">test</span> -e status  touch status</span><br><span class="line">head -1 status &gt; status.clean</span><br><span class="line">sed <span class="string">&#x27;s/&quot;//g&#x27;</span> status  <span class="keyword">while</span> <span class="built_in">read</span> logfile date</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    [ -e <span class="string">&quot;<span class="variable">$logfile</span>&quot;</span> ] &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;\&quot;<span class="variable">$logfile</span>\&quot; <span class="variable">$date</span>&quot;</span></span><br><span class="line"><span class="keyword">done</span> &gt;&gt; status.clean</span><br><span class="line">mv status.clean status</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span> -x /usr/sbin/logrotate  <span class="built_in">exit</span> 0</span><br><span class="line">/usr/sbin/logrotate /etc/logrotate.conf</span><br></pre></td></tr></table></figure>
+
+
     </div>
 
     
@@ -324,7 +326,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives/">
         
-          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-count">43</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>

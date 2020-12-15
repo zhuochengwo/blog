@@ -28,7 +28,7 @@
 <meta property="og:description" content="开发过微信相关的应该都知道，微信昵称中的emoji表情要想保存到MySQL数据库中，使用utf8编码是不行的，需要修改库表字符编码为utf8mb4。以前碰到这个问题的时候也没有深究，只是知道utf8mb4支持的范围比utf8更广。 直到今天看到infoQ的一篇文章记住，永远不要在MySQL中使用“utf8” ，才认真的看了下MySQL utf8与utf8mb4的问题。 标准utf8编码使用14个字">
 <meta property="og:locale">
 <meta property="article:published_time" content="2018-07-18T03:29:41.000Z">
-<meta property="article:modified_time" content="2020-12-15T05:45:28.643Z">
+<meta property="article:modified_time" content="2020-12-15T06:41:39.898Z">
 <meta property="article:author" content="Chengfeng">
 <meta property="article:tag" content="MySQL">
 <meta name="twitter:card" content="summary">
@@ -181,7 +181,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
+                <time title="Modified: 2020-12-15 14:41:39" itemprop="dateModified" datetime="2020-12-15T14:41:39+08:00">2020-12-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -228,7 +228,7 @@
 <li>  For a supplementary character, <code>utf8mb4</code> requires four bytes to store it, whereas <code>utf8mb3</code> cannot store the character at all. When converting <code>utf8mb3</code> columns to<code>utf8mb4</code>, you need not worry about converting supplementary characters because there will be none.</li>
 </ul>
 </blockquote>
-<p>mysql支持的 utf8 编码最大字符长度为 3 字节，如果遇到 4 字节的宽字符就会有问题了。MySQL在5.5.3之后增加了这个utf8mb4的编码，mb4就是most bytes 4的意思，专门用来兼容四字节的unicode。其实utf8是utf8mb3的别名，utf8mb4就是utf8的超集并完全兼容utf8，也是真正意义上符合标准utf8编码的。 为了更好的兼容性，应使用 utf8mb4，同时要注意连接字符集也要设置为utf8mb4，否则在 严格模式 下会出现 <code>Incorrect string value: /xF0/xA1/x8B/xBE/xE5/xA2… for column &#39;name&#39;</code>这样的错误，非严格模式下此后的数据会被截断。 还有一点需要注意的是，对于 CHAR 类型数据，utf8mb4 会多消耗一些空间，根据 Mysql 官方建议，使用 VARCHAR  替代 CHAR。</p>
+<p><code>mysql</code>支持的 <code>utf8</code> 编码最大字符长度为 3 字节，如果遇到 4 字节的宽字符就会有问题了。MySQL在5.5.3之后增加了这个<code>utf8mb4</code>的编码，<code>mb4</code>就是<code>most bytes 4</code>的意思，专门用来兼容四字节的<code>unicode</code>。其实<code>utf8</code>是<code>utf8mb3</code>的别名，<code>utf8mb4</code>就是<code>utf8</code>的超集并完全兼容<code>utf8</code>，也是真正意义上符合标准<code>utf8</code>编码的。 为了更好的兼容性，应使用 <code>utf8mb4</code>，同时要注意连接字符集也要设置为<code>utf8mb4</code>，否则在 严格模式 下会出现 <code>Incorrect string value: /xF0/xA1/x8B/xBE/xE5/xA2… for column &#39;name&#39;</code>这样的错误，非严格模式下此后的数据会被截断。 还有一点需要注意的是，对于 CHAR 类型数据，<code>utf8mb4</code> 会多消耗一些空间，根据 Mysql 官方建议，使用 VARCHAR  替代 CHAR。</p>
 <h3 id="utf8升级utf8mb4具体步骤"><a href="#utf8升级utf8mb4具体步骤" class="headerlink" title="utf8升级utf8mb4具体步骤"></a>utf8升级utf8mb4具体步骤</h3><p>SQL 语句如下：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改数据库:</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">DATABASE</span> database_name <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> = utf8mb4 <span class="keyword">COLLATE</span> = utf8mb4_unicode_ci;  </span><br><span class="line"><span class="comment"># 修改表:</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> table_name <span class="keyword">CONVERT</span> <span class="keyword">TO</span> <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> utf8mb4 <span class="keyword">COLLATE</span> utf8mb4_unicode_ci;</span><br><span class="line"><span class="comment"># 修改表字段:</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> table_name <span class="keyword">CHANGE</span> column_name column_name <span class="built_in">VARCHAR</span>(<span class="number">191</span>) <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> utf8mb4 <span class="keyword">COLLATE</span> utf8mb4_unicode_ci;</span><br></pre></td></tr></table></figure>
 
@@ -238,7 +238,7 @@
 <p>检查环境变量 和测试 SQL 如下：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> <span class="keyword">VARIABLES</span> <span class="keyword">WHERE</span> Variable_name <span class="keyword">LIKE</span> <span class="string">&#x27;character\_set\_%&#x27;</span> <span class="keyword">OR</span> Variable_name <span class="keyword">LIKE</span> <span class="string">&#x27;collation%&#x27;</span>;</span><br></pre></td></tr></table></figure>
 
-<h3 id="key-768-long-错误"><a href="#key-768-long-错误" class="headerlink" title="key 768 long 错误"></a>key 768 long 错误</h3><p>字符集从utf8转到utf8mb4之后，最容易引起的就是索引键超长的问题。 对于表行格式是 <code>COMPACT</code>或 <code>REDUNDANT</code>，InnoDB有单个索引最大字节数 768 的限制，而字段定义的是能存储的字符数，比如 <code>VARCHAR(200)</code> 代表能够存200个汉字，索引定义是字符集类型最大长度算的，即 utf8 maxbytes=3, utf8mb4 maxbytes=4，算下来utf8和utf8mb4两种情况的索引长度分别为600 bytes和800bytes，后者超过了768，导致出错：<code>Error 1071: Specified key was too long; max key length is 767 bytes</code>。 <code>COMPRESSED</code>和<code>DYNAMIC</code>格式不受限制，但也依然不建议索引太长，太浪费空间和cpu搜索资源。 如果已有定义超过这个长度的，可加上前缀索引，如果暂不能加上前缀索引（像唯一索引），可把该字段的字符集改回utf8或latin1。 但是，（ <strong>敲黑板啦，很重要</strong> ），要防止出现 <code>Illegal mix of collations (utf8_general_ci,IMPLICIT) and (utf8mb4_general_ci,COERCIBLE) for operation &#39;=&#39;</code> 错误：连接字符集使用utf8mb4，但 SELECT/UPDATE where条件有utf8类型的列，且条件右边存在不属于utf8字符，就会触发该异常。</p>
+<h3 id="key-768-long-错误"><a href="#key-768-long-错误" class="headerlink" title="key 768 long 错误"></a>key 768 long 错误</h3><p>字符集从<code>utf8</code>转到<code>utf8mb4</code>之后，最容易引起的就是索引键超长的问题。 对于表行格式是 <code>COMPACT</code>或 <code>REDUNDANT</code>，InnoDB有单个索引最大字节数 768 的限制，而字段定义的是能存储的字符数，比如 <code>VARCHAR(200)</code> 代表能够存200个汉字，索引定义是字符集类型最大长度算的，即 utf8 maxbytes=3, utf8mb4 maxbytes=4，算下来utf8和utf8mb4两种情况的索引长度分别为600 bytes和800bytes，后者超过了768，导致出错：<code>Error 1071: Specified key was too long; max key length is 767 bytes</code>。 <code>COMPRESSED</code>和<code>DYNAMIC</code>格式不受限制，但也依然不建议索引太长，太浪费空间和cpu搜索资源。 如果已有定义超过这个长度的，可加上前缀索引，如果暂不能加上前缀索引（像唯一索引），可把该字段的字符集改回utf8或latin1。 但是，（ <strong>敲黑板啦，很重要</strong> ），要防止出现 <code>Illegal mix of collations (utf8_general_ci,IMPLICIT) and (utf8mb4_general_ci,COERCIBLE) for operation &#39;=&#39;</code> 错误：连接字符集使用utf8mb4，但 SELECT/UPDATE where条件有utf8类型的列，且条件右边存在不属于utf8字符，就会触发该异常。</p>
 
     </div>
 
@@ -336,7 +336,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives/">
         
-          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-count">43</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>

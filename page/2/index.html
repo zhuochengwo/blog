@@ -178,7 +178,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
+                <time title="Modified: 2020-12-15 14:36:35" itemprop="dateModified" datetime="2020-12-15T14:36:35+08:00">2020-12-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -205,14 +205,14 @@
 <h2 id="创建项目"><a href="#创建项目" class="headerlink" title="创建项目"></a>创建项目</h2><p>在<a target="_blank" rel="noopener" href="https://console.developers.google.com/projectcreate">创建项目</a>填入<code>Project Name</code>就可以非常简单的完成项目的创建</p>
 <h2 id="创建OAuth-Client-ID"><a href="#创建OAuth-Client-ID" class="headerlink" title="创建OAuth Client ID"></a>创建<code>OAuth Client ID</code></h2><p>在<a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/credentials">控制面板</a>可以创建和查看App的相关信息 新创建的App需要在这里生成一个<code>OAuth Client ID</code>，如果App还没配置，创建的时候可能会提示配置<code>OAuth consent screen</code>，点击配置，在配置页面填写下<code>Application name</code>保存即可。 <img src="https://blog-1252719385.cos.ap-guangzhou.myqcloud.com/images/Selection_022.png" alt="生成OAuth Client ID" title="生成OAuth Client ID"> 创建的时候选择<code>Web application</code>,注意填写<code>Authorized JavaScript origins</code>,就是前端项目的域名，回调地址可以先不填。 <img src="https://blog-1252719385.cos.ap-guangzhou.myqcloud.com/images/Selection_023.png" alt="生成OAuth Client ID" title="生成OAuth Client ID"> 这样我们就有了需要的<code>Client ID</code>和<code>Client Secret</code>。</p>
 <h2 id="获取id-token"><a href="#获取id-token" class="headerlink" title="获取id_token"></a>获取<code>id_token</code></h2><h3 id="前端代码"><a href="#前端代码" class="headerlink" title="前端代码"></a>前端代码</h3><p>修改<code>meta</code>中的<code>YOUR_CLIENT_ID</code>为申请的应用的<code>Client ID</code>，这样就可以获取到我们需要的<code>id_token</code>了，将<code>id_token</code>以请求参数传递给后端验证就可以完成整个登录流程了。如果需要的话，我们也可以直接在前端获取到<code>access_token</code>。下边代码会打印<code>id_token</code>和<code>access_token</code>，可以在控制台查看。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&lt;!doctype html&gt;</span><br><span class="line">&lt;html lang&#x3D;&quot;en&quot;&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;meta charset&#x3D;&quot;UTF-8&quot;&gt;</span><br><span class="line">    &lt;meta name&#x3D;&quot;viewport&quot;</span><br><span class="line">          content&#x3D;&quot;width&#x3D;device-width, user-scalable&#x3D;no, initial-scale&#x3D;1.0, maximum-scale&#x3D;1.0, minimum-scale&#x3D;1.0&quot;&gt;</span><br><span class="line">    &lt;meta http-equiv&#x3D;&quot;X-UA-Compatible&quot; content&#x3D;&quot;ie&#x3D;edge&quot;&gt;</span><br><span class="line">    &lt;script src&#x3D;&quot;https:&#x2F;&#x2F;apis.google.com&#x2F;js&#x2F;platform.js&quot; async defer&gt;&lt;&#x2F;script&gt;</span><br><span class="line">    &lt;meta name&#x3D;&quot;google-signin-client_id&quot; content&#x3D;&quot;YOUR_CLIENT_ID.apps.googleusercontent.com&quot;&gt;</span><br><span class="line">    &lt;title&gt;test google&lt;&#x2F;title&gt;</span><br><span class="line">&lt;&#x2F;head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;div class&#x3D;&quot;g-signin2&quot; data-onsuccess&#x3D;&quot;onSignIn&quot;&gt;&lt;&#x2F;div&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">    function onSignIn(googleUser) &#123;</span><br><span class="line">        console.log(googleUser.getAuthResponse().id_token);</span><br><span class="line">        console.log(googleUser.getAuthResponse(true).access_token);</span><br><span class="line">    &#125;</span><br><span class="line">&lt;&#x2F;script&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!doctype <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span></span></span><br><span class="line"><span class="tag">          <span class="attr">content</span>=<span class="string">&quot;width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;ie=edge&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;https://apis.google.com/js/platform.js&quot;</span> <span class="attr">async</span> <span class="attr">defer</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;google-signin-client_id&quot;</span> <span class="attr">content</span>=<span class="string">&quot;YOUR_CLIENT_ID.apps.googleusercontent.com&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>test google<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;g-signin2&quot;</span> <span class="attr">data-onsuccess</span>=<span class="string">&quot;onSignIn&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="javascript">    <span class="function"><span class="keyword">function</span> <span class="title">onSignIn</span>(<span class="params">googleUser</span>) </span>&#123;</span></span><br><span class="line"><span class="javascript">        <span class="built_in">console</span>.log(googleUser.getAuthResponse().id_token);</span></span><br><span class="line"><span class="javascript">        <span class="built_in">console</span>.log(googleUser.getAuthResponse(<span class="literal">true</span>).access_token);</span></span><br><span class="line">    &#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="后端代码（PHP）"><a href="#后端代码（PHP）" class="headerlink" title="后端代码（PHP）"></a>后端代码（PHP）</h3><p>后端提供接口，使用<code>google</code>提供的api验证<code>id_token</code>就可以了 先安装官方包</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">composer <span class="keyword">require</span> google/apiclient</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$client</span> = <span class="keyword">new</span> Google_Client([<span class="string">&#x27;client_id&#x27;</span> =&gt; <span class="variable">$CLIENT_ID</span>]);</span><br><span class="line"><span class="variable">$payload</span> = <span class="variable">$client</span>-&gt;verifyIdToken(<span class="variable">$id_token</span>);</span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$payload</span>) &#123;</span><br><span class="line"><span class="comment">//验证成功</span></span><br><span class="line">  <span class="variable">$userid</span> = <span class="variable">$payload</span>[<span class="string">&#x27;sub&#x27;</span>];</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  <span class="comment">//验证失败</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>其它语言实现可参考<a target="_blank" rel="noopener" href="https://developers.google.com/identity/sign-in/web/backend-auth">官方文档</a> 这样就非常简单的完成了google第三方登录的流程。 如果还有其它不清楚的地方，可以查看<a target="_blank" rel="noopener" href="https://developers.google.com/identity/sign-in/web/backend-auth">官方文档</a>的说明，相对来说，google的文档还是比较简单清晰的。 相关文章： <a target="_blank" rel="noopener" href="https://chengfeng.site/2019/01/31/facebook%E7%AC%AC%E4%B8%89%E6%96%B9%E7%99%BB%E5%BD%95web%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB/">Facebook第三方登录</a> <a target="_blank" rel="noopener" href="https://chengfeng.site/2019/01/30/twitter%E7%AC%AC%E4%B8%89%E6%96%B9%E7%99%BB%E5%BD%95web%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB/">Twitter第三方登录</a></p>
+<p>其它语言实现可参考<a target="_blank" rel="noopener" href="https://developers.google.com/identity/sign-in/web/backend-auth">官方文档</a> 这样就非常简单的完成了google第三方登录的流程。 如果还有其它不清楚的地方，可以查看<a target="_blank" rel="noopener" href="https://developers.google.com/identity/sign-in/web/backend-auth">官方文档</a>的说明，相对来说，google的文档还是比较简单清晰的。 </p>
 
       
     </div>
@@ -263,7 +263,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
+                <time title="Modified: 2020-12-15 14:37:32" itemprop="dateModified" datetime="2020-12-15T14:37:32+08:00">2020-12-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -299,13 +299,13 @@
 
 <p>这篇文章主要探讨怎么怎么解决这个问题。</p>
 <h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>一开始找到的方案都是通过添加<code>php-fpm</code>中<code>extra_hosts</code>的配置来实现的，这种方案比较麻烦，配置好后还需要需要<code>rebuild</code> <code>wordspace</code>和<code>php-fpm</code>两个容器，这里主要介绍一种更加简单的方法。 找到<code>docker-compose.yml</code>中<code>nginx</code>配置 原<code>nginx</code>中<code>networks</code>配置如下：</p>
-<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">network<span class="variable">s:</span></span><br><span class="line">        - frontend</span><br><span class="line">        - backend</span><br></pre></td></tr></table></figure>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">networks:</span><br><span class="line">        - frontend</span><br><span class="line">        - backend</span><br></pre></td></tr></table></figure>
 
 <p>将其修改为:</p>
-<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">network<span class="variable">s:</span></span><br><span class="line">        frontend:</span><br><span class="line">         aliase<span class="variable">s:</span></span><br><span class="line">          - bbb.dev</span><br><span class="line">        backend:</span><br><span class="line">         aliase<span class="variable">s:</span></span><br><span class="line">          - bbb.dev</span><br></pre></td></tr></table></figure>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">networks:</span><br><span class="line">        frontend:</span><br><span class="line">         aliases:</span><br><span class="line">          - bbb.dev</span><br><span class="line">        backend:</span><br><span class="line">         aliases:</span><br><span class="line">          - bbb.dev</span><br></pre></td></tr></table></figure>
 
 <p>此配置是运行时配置，不需要<code>rebulid</code>，执行<code>docker-compose up -d nginx</code>会<code>recreate</code>容器，配置就能生效 <code>nginx</code>模块完整配置如下</p>
-<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">### NGINX Server #########################################</span><br><span class="line">    nginx:</span><br><span class="line">      build:</span><br><span class="line">        contex<span class="variable">t:</span> ./nginx</span><br><span class="line">        arg<span class="variable">s:</span></span><br><span class="line">          - PHP_UPSTREAM_CONTAINER=$&#123;NGINX_PHP_UPSTREAM_CONTAINER&#125;</span><br><span class="line">          - PHP_UPSTREAM_PORT=$&#123;NGINX_PHP_UPSTREAM_PORT&#125;</span><br><span class="line">          - CHANGE_SOURCE=$&#123;CHANGE_SOURCE&#125;</span><br><span class="line">      volume<span class="variable">s:</span></span><br><span class="line">        - $&#123;APP_CODE_PATH_HOST&#125;:$&#123;APP_CODE_PATH_CONTAINER&#125;</span><br><span class="line">        - $&#123;NGINX_HOST_LOG_PATH&#125;:/var/<span class="built_in">log</span>/nginx</span><br><span class="line">        - $&#123;NGINX_SITES_PATH&#125;:/etc/nginx/sites-available</span><br><span class="line">        - $&#123;NGINX_SSL_PATH&#125;:/etc/nginx/ssl</span><br><span class="line">      port<span class="variable">s:</span></span><br><span class="line">        - <span class="string">&quot;$&#123;NGINX_HOST_HTTP_PORT&#125;:80&quot;</span></span><br><span class="line">        - <span class="string">&quot;$&#123;NGINX_HOST_HTTPS_PORT&#125;:443&quot;</span></span><br><span class="line">      depends_on:</span><br><span class="line">        - php-fpm</span><br><span class="line">      network<span class="variable">s:</span></span><br><span class="line">        frontend:</span><br><span class="line">         aliase<span class="variable">s:</span></span><br><span class="line">          - bbb.dev</span><br><span class="line">        backend:</span><br><span class="line">         aliase<span class="variable">s:</span></span><br><span class="line">          - bbb.dev</span><br></pre></td></tr></table></figure>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">### NGINX Server #########################################</span></span><br><span class="line">    nginx:</span><br><span class="line">      build:</span><br><span class="line">        context: ./nginx</span><br><span class="line">        args:</span><br><span class="line">          - PHP_UPSTREAM_CONTAINER=$&#123;NGINX_PHP_UPSTREAM_CONTAINER&#125;</span><br><span class="line">          - PHP_UPSTREAM_PORT=$&#123;NGINX_PHP_UPSTREAM_PORT&#125;</span><br><span class="line">          - CHANGE_SOURCE=$&#123;CHANGE_SOURCE&#125;</span><br><span class="line">      volumes:</span><br><span class="line">        - $&#123;APP_CODE_PATH_HOST&#125;:$&#123;APP_CODE_PATH_CONTAINER&#125;</span><br><span class="line">        - $&#123;NGINX_HOST_LOG_PATH&#125;:/var/log/nginx</span><br><span class="line">        - $&#123;NGINX_SITES_PATH&#125;:/etc/nginx/sites-available</span><br><span class="line">        - $&#123;NGINX_SSL_PATH&#125;:/etc/nginx/ssl</span><br><span class="line">      ports:</span><br><span class="line">        - <span class="string">&quot;$&#123;NGINX_HOST_HTTP_PORT&#125;:80&quot;</span></span><br><span class="line">        - <span class="string">&quot;$&#123;NGINX_HOST_HTTPS_PORT&#125;:443&quot;</span></span><br><span class="line">      depends_on:</span><br><span class="line">        - php-fpm</span><br><span class="line">      networks:</span><br><span class="line">        frontend:</span><br><span class="line">         aliases:</span><br><span class="line">          - bbb.dev</span><br><span class="line">        backend:</span><br><span class="line">         aliases:</span><br><span class="line">          - bbb.dev</span><br></pre></td></tr></table></figure>
 
 <p>到这里基本就解决这个问题了，同时<code>aliases</code>配置的是个数组意味我们可以配置很多个项目来实现我们在<code>laradock</code>中多项目的互相访问。 关于此问题更多的信息可以关注<code>laradock</code>的<a target="_blank" rel="noopener" href="https://github.com/laradock/laradock/issues/435">issue#435</a>,本篇文章的解决方案也来自于此issue中<a target="_blank" rel="noopener" href="https://github.com/laradock/laradock/issues/435#issuecomment-374576781">iceheat的回复</a>，对于<code>extra_hosts</code>的配置也有讨论，可以自行摸索。</p>
 
@@ -701,87 +701,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="https://zhuochengwo.github.io/blog/2018/09/14/centos%E5%AE%89%E8%A3%85docker-compose%E9%87%8D%E5%90%AF%E5%AF%BC%E8%87%B4root%E6%97%A0%E6%B3%95ssh%E7%99%BB%E5%BD%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/blog/images/avatar.gif">
-      <meta itemprop="name" content="Chengfeng">
-      <meta itemprop="description" content="生活的点点滴滴">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="程枫的个人博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/blog/2018/09/14/centos%E5%AE%89%E8%A3%85docker-compose%E9%87%8D%E5%90%AF%E5%AF%BC%E8%87%B4root%E6%97%A0%E6%B3%95ssh%E7%99%BB%E5%BD%95/" class="post-title-link" itemprop="url">Centos安装docker compose重启导致root无法ssh登录</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-09-14 13:00:47" itemprop="dateCreated datePublished" datetime="2018-09-14T13:00:47+08:00">2018-09-14</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/%E6%95%B2%E4%BB%A3%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">敲代码</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>近日，有网友反馈在虚拟机的 <strong>centos</strong> 上安装 <strong>docker compose</strong> 重启虚拟机后，出现<strong>root</strong>用户无法 <strong>ssh</strong> 登录的情况。 我一般很少直接用 <strong>root</strong> 用户登录，所以也没注意过这个问题，下了个 <strong>centos 7.5</strong> 的版本用虚拟机选择最小安装，随后安装 <strong>docker</strong> 及 <strong>docker compose</strong> ，重启电脑，期待复现问题。没想到还真出现了，确实有 <strong>root</strong> 无法登录的情况，回看了下整个操作，基本确定也就是 <strong>docker compose</strong> 导致的。 普通用户还是可以正常登陆的，于是用 <strong>xshell</strong> 连接虚拟机登陆上普通用户，看了下，<strong>docker</strong> 的服务没有启动，因为安装后没有添加开机自启动，抱着试一试的态度，启动了 <strong>docker</strong> 服务</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo service docker start</span><br></pre></td></tr></table></figure>
-
-<p>而后再次尝试 <strong>xshell</strong> 使用 <strong>root</strong> 登陆，发现能正常登陆了。 在 <strong>/var/log/secure</strong> 日志中找到一条</p>
-<blockquote>
-<p>pam_succeed_if(sshd:auth): requirement “uid &gt;= 1000” not met by user “root”</p>
-</blockquote>
-<p>检查了下  <strong>/etc/pam.d/</strong>  下的配置，也没能发现什么异常，抱着一探究竟的心态，重新安装虚拟机尝试定位问题，很遗憾的是，没能再出现这个问题。 <strong>目前有点无解了，记录下，改天再试试。</strong></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
     <link itemprop="mainEntityOfPage" href="https://zhuochengwo.github.io/blog/2018/08/28/shell%E4%B8%AD%E4%BD%BF%E7%94%A8mysql%E6%9F%A5%E8%AF%A2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -917,7 +836,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
+                <time title="Modified: 2020-12-15 14:34:59" itemprop="dateModified" datetime="2020-12-15T14:34:59+08:00">2020-12-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -944,8 +863,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>在看w3schools的<a target="_blank" rel="noopener" href="https://www.w3schools.com/css/css_dropdowns.asp">CSS Dropdowns</a>章节的时候，想着给下拉列表加上个过渡动画效果会更好，实际试了下，发现直接<code>height:auto</code>好像还实现不了，找了下，可以通过<code>max-height</code>的方式来实现。 想要实现的效果如下，在鼠标移动到<code>dropdown</code>上时过渡出现下拉列表，这个时候容器的height是不固定的，也是未知的，因为里边的<code>item</code>未知。想当然的想到<code>height:auto</code>，但发现<code>transition</code>效果没有预期出现，这主要是<code>transition</code>实现机制的问题。这里用max-height来实现，将<code>max-height</code>在<code>hover</code>时设置成一个肯定能大于<code>height</code>的值即可。</p>
-<h3 id="完整代码如下"><a href="#完整代码如下" class="headerlink" title="完整代码如下:"></a>完整代码如下:</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;style&gt;</span><br><span class="line">.dropbtn &#123;</span><br><span class="line">    background-color: #4CAF50;</span><br><span class="line">    color: white;</span><br><span class="line">    padding: 16px;</span><br><span class="line">    font-size: 16px;</span><br><span class="line">    border: none;</span><br><span class="line">    cursor: pointer;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">.dropdown &#123;</span><br><span class="line">    position: relative;</span><br><span class="line">    display: inline-block;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">.dropdown-content &#123;</span><br><span class="line">    display: block;</span><br><span class="line">    position: absolute;</span><br><span class="line">    background-color: #f9f9f9;</span><br><span class="line">    min-width: 160px;</span><br><span class="line">    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);</span><br><span class="line">    z-index: 1;</span><br><span class="line">    max-height:0;</span><br><span class="line">    overflow:hidden;</span><br><span class="line">    transition:max-height 0.6s;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">.dropdown-content a &#123;</span><br><span class="line">    color: black;</span><br><span class="line">    padding: 12px 16px;</span><br><span class="line">    text-decoration: none;</span><br><span class="line">    display: block;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">.dropdown-content a:hover &#123;background-color: #f1f1f1&#125;</span><br><span class="line"></span><br><span class="line">.dropdown:hover .dropdown-content &#123;</span><br><span class="line">    max-height:200px;</span><br><span class="line">    transition:max-height 0.8s;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">.dropdown:hover .dropbtn &#123;</span><br><span class="line">    background-color: #3e8e41;</span><br><span class="line">&#125;</span><br><span class="line">&lt;&#x2F;style&gt;</span><br><span class="line">&lt;&#x2F;head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"></span><br><span class="line">&lt;h2&gt;Dropdown Menu&lt;&#x2F;h2&gt;</span><br><span class="line">&lt;p&gt;Move the mouse over the button to open the dropdown menu.&lt;&#x2F;p&gt;</span><br><span class="line"></span><br><span class="line">&lt;div class&#x3D;&quot;dropdown&quot;&gt;</span><br><span class="line">  &lt;button class&#x3D;&quot;dropbtn&quot;&gt;Dropdown&lt;&#x2F;button&gt;</span><br><span class="line">  &lt;div class&#x3D;&quot;dropdown-content&quot;&gt;</span><br><span class="line">    &lt;a href&#x3D;&quot;#&quot;&gt;Link 1&lt;&#x2F;a&gt;</span><br><span class="line">    &lt;a href&#x3D;&quot;#&quot;&gt;Link 2&lt;&#x2F;a&gt;</span><br><span class="line">    &lt;a href&#x3D;&quot;#&quot;&gt;Link 3&lt;&#x2F;a&gt;</span><br><span class="line">  &lt;&#x2F;div&gt;</span><br><span class="line">&lt;&#x2F;div&gt;</span><br><span class="line"></span><br><span class="line">&lt;p&gt;&lt;strong&gt;Note:&lt;&#x2F;strong&gt; We use href&#x3D;&quot;#&quot; for test links. In a real web site this would be URLs.&lt;&#x2F;p&gt;</span><br><span class="line"></span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
+          <p>在看w3schools的<a target="_blank" rel="noopener" href="https://www.w3schools.com/css/css_dropdowns.asp">CSS Dropdowns</a>章节的时候，想着给下拉列表加上个过渡动画效果会更好，实际试了下，发现直接<code>height:auto</code>好像还实现不了，找了下，可以通过<code>max-height</code>的方式来实现。 想要实现的效果如下，在鼠标移动到<code>dropdown</code>上时过渡出现下拉列表，这个时候容器的height是不固定的，也是未知的，因为里边的<code>item</code>未知。想当然的想到<code>height:auto</code>，但发现<code>transition</code>效果没有预期出现，这主要是<code>transition</code>实现机制的问题。需要用<code>max-height</code>来实现，将<code>max-height</code>在<code>hover</code>时设置成一个肯定能大于<code>height</code>的值即可。</p>
+<h3 id="完整代码如下"><a href="#完整代码如下" class="headerlink" title="完整代码如下:"></a>完整代码如下:</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="css"><span class="selector-class">.dropbtn</span> &#123;</span></span><br><span class="line"><span class="css">    <span class="selector-tag">background-color</span>: <span class="selector-id">#4CAF50</span>;</span></span><br><span class="line">    color: white;</span><br><span class="line">    padding: 16px;</span><br><span class="line">    font-size: 16px;</span><br><span class="line">    border: none;</span><br><span class="line">    cursor: pointer;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="css"><span class="selector-class">.dropdown</span> &#123;</span></span><br><span class="line">    position: relative;</span><br><span class="line">    display: inline-block;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="css"><span class="selector-class">.dropdown-content</span> &#123;</span></span><br><span class="line">    display: block;</span><br><span class="line">    position: absolute;</span><br><span class="line"><span class="css">    <span class="selector-tag">background-color</span>: <span class="selector-id">#f9f9f9</span>;</span></span><br><span class="line">    min-width: 160px;</span><br><span class="line">    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);</span><br><span class="line">    z-index: 1;</span><br><span class="line"><span class="css">    <span class="selector-tag">max-height</span><span class="selector-pseudo">:0</span>;</span></span><br><span class="line"><span class="css">    <span class="selector-tag">overflow</span><span class="selector-pseudo">:hidden</span>;</span></span><br><span class="line"><span class="css">    <span class="selector-tag">transition</span><span class="selector-pseudo">:max-height</span> 0.6<span class="selector-tag">s</span>;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="css"><span class="selector-class">.dropdown-content</span> <span class="selector-tag">a</span> &#123;</span></span><br><span class="line">    color: black;</span><br><span class="line">    padding: 12px 16px;</span><br><span class="line">    text-decoration: none;</span><br><span class="line">    display: block;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="css"><span class="selector-class">.dropdown-content</span> <span class="selector-tag">a</span><span class="selector-pseudo">:hover</span> &#123;<span class="attribute">background-color</span>: <span class="number">#f1f1f1</span>&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="css"><span class="selector-class">.dropdown</span><span class="selector-pseudo">:hover</span> <span class="selector-class">.dropdown-content</span> &#123;</span></span><br><span class="line"><span class="css">    <span class="selector-tag">max-height</span><span class="selector-pseudo">:200px</span>;</span></span><br><span class="line"><span class="css">    <span class="selector-tag">transition</span><span class="selector-pseudo">:max-height</span> 0.8<span class="selector-tag">s</span>;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="css"><span class="selector-class">.dropdown</span><span class="selector-pseudo">:hover</span> <span class="selector-class">.dropbtn</span> &#123;</span></span><br><span class="line"><span class="css">    <span class="selector-tag">background-color</span>: <span class="selector-id">#3e8e41</span>;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">h2</span>&gt;</span>Dropdown Menu<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>Move the mouse over the button to open the dropdown menu.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;dropdown&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">button</span> <span class="attr">class</span>=<span class="string">&quot;dropbtn&quot;</span>&gt;</span>Dropdown<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;dropdown-content&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;#&quot;</span>&gt;</span>Link 1<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;#&quot;</span>&gt;</span>Link 2<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;#&quot;</span>&gt;</span>Link 3<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">strong</span>&gt;</span>Note:<span class="tag">&lt;/<span class="name">strong</span>&gt;</span> We use href=&quot;#&quot; for test links. In a real web site this would be URLs.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>当然，其实还有其它的方式实现，不过这种方式应该是最简单的，这里记录一下。</p>
 
@@ -998,7 +917,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
+                <time title="Modified: 2020-12-15 14:41:39" itemprop="dateModified" datetime="2020-12-15T14:41:39+08:00">2020-12-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1045,7 +964,7 @@
 <li>  For a supplementary character, <code>utf8mb4</code> requires four bytes to store it, whereas <code>utf8mb3</code> cannot store the character at all. When converting <code>utf8mb3</code> columns to<code>utf8mb4</code>, you need not worry about converting supplementary characters because there will be none.</li>
 </ul>
 </blockquote>
-<p>mysql支持的 utf8 编码最大字符长度为 3 字节，如果遇到 4 字节的宽字符就会有问题了。MySQL在5.5.3之后增加了这个utf8mb4的编码，mb4就是most bytes 4的意思，专门用来兼容四字节的unicode。其实utf8是utf8mb3的别名，utf8mb4就是utf8的超集并完全兼容utf8，也是真正意义上符合标准utf8编码的。 为了更好的兼容性，应使用 utf8mb4，同时要注意连接字符集也要设置为utf8mb4，否则在 严格模式 下会出现 <code>Incorrect string value: /xF0/xA1/x8B/xBE/xE5/xA2… for column &#39;name&#39;</code>这样的错误，非严格模式下此后的数据会被截断。 还有一点需要注意的是，对于 CHAR 类型数据，utf8mb4 会多消耗一些空间，根据 Mysql 官方建议，使用 VARCHAR  替代 CHAR。</p>
+<p><code>mysql</code>支持的 <code>utf8</code> 编码最大字符长度为 3 字节，如果遇到 4 字节的宽字符就会有问题了。MySQL在5.5.3之后增加了这个<code>utf8mb4</code>的编码，<code>mb4</code>就是<code>most bytes 4</code>的意思，专门用来兼容四字节的<code>unicode</code>。其实<code>utf8</code>是<code>utf8mb3</code>的别名，<code>utf8mb4</code>就是<code>utf8</code>的超集并完全兼容<code>utf8</code>，也是真正意义上符合标准<code>utf8</code>编码的。 为了更好的兼容性，应使用 <code>utf8mb4</code>，同时要注意连接字符集也要设置为<code>utf8mb4</code>，否则在 严格模式 下会出现 <code>Incorrect string value: /xF0/xA1/x8B/xBE/xE5/xA2… for column &#39;name&#39;</code>这样的错误，非严格模式下此后的数据会被截断。 还有一点需要注意的是，对于 CHAR 类型数据，<code>utf8mb4</code> 会多消耗一些空间，根据 Mysql 官方建议，使用 VARCHAR  替代 CHAR。</p>
 <h3 id="utf8升级utf8mb4具体步骤"><a href="#utf8升级utf8mb4具体步骤" class="headerlink" title="utf8升级utf8mb4具体步骤"></a>utf8升级utf8mb4具体步骤</h3><p>SQL 语句如下：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改数据库:</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">DATABASE</span> database_name <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> = utf8mb4 <span class="keyword">COLLATE</span> = utf8mb4_unicode_ci;  </span><br><span class="line"><span class="comment"># 修改表:</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> table_name <span class="keyword">CONVERT</span> <span class="keyword">TO</span> <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> utf8mb4 <span class="keyword">COLLATE</span> utf8mb4_unicode_ci;</span><br><span class="line"><span class="comment"># 修改表字段:</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> table_name <span class="keyword">CHANGE</span> column_name column_name <span class="built_in">VARCHAR</span>(<span class="number">191</span>) <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> utf8mb4 <span class="keyword">COLLATE</span> utf8mb4_unicode_ci;</span><br></pre></td></tr></table></figure>
 
@@ -1055,7 +974,92 @@
 <p>检查环境变量 和测试 SQL 如下：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> <span class="keyword">VARIABLES</span> <span class="keyword">WHERE</span> Variable_name <span class="keyword">LIKE</span> <span class="string">&#x27;character\_set\_%&#x27;</span> <span class="keyword">OR</span> Variable_name <span class="keyword">LIKE</span> <span class="string">&#x27;collation%&#x27;</span>;</span><br></pre></td></tr></table></figure>
 
-<h3 id="key-768-long-错误"><a href="#key-768-long-错误" class="headerlink" title="key 768 long 错误"></a>key 768 long 错误</h3><p>字符集从utf8转到utf8mb4之后，最容易引起的就是索引键超长的问题。 对于表行格式是 <code>COMPACT</code>或 <code>REDUNDANT</code>，InnoDB有单个索引最大字节数 768 的限制，而字段定义的是能存储的字符数，比如 <code>VARCHAR(200)</code> 代表能够存200个汉字，索引定义是字符集类型最大长度算的，即 utf8 maxbytes=3, utf8mb4 maxbytes=4，算下来utf8和utf8mb4两种情况的索引长度分别为600 bytes和800bytes，后者超过了768，导致出错：<code>Error 1071: Specified key was too long; max key length is 767 bytes</code>。 <code>COMPRESSED</code>和<code>DYNAMIC</code>格式不受限制，但也依然不建议索引太长，太浪费空间和cpu搜索资源。 如果已有定义超过这个长度的，可加上前缀索引，如果暂不能加上前缀索引（像唯一索引），可把该字段的字符集改回utf8或latin1。 但是，（ <strong>敲黑板啦，很重要</strong> ），要防止出现 <code>Illegal mix of collations (utf8_general_ci,IMPLICIT) and (utf8mb4_general_ci,COERCIBLE) for operation &#39;=&#39;</code> 错误：连接字符集使用utf8mb4，但 SELECT/UPDATE where条件有utf8类型的列，且条件右边存在不属于utf8字符，就会触发该异常。</p>
+<h3 id="key-768-long-错误"><a href="#key-768-long-错误" class="headerlink" title="key 768 long 错误"></a>key 768 long 错误</h3><p>字符集从<code>utf8</code>转到<code>utf8mb4</code>之后，最容易引起的就是索引键超长的问题。 对于表行格式是 <code>COMPACT</code>或 <code>REDUNDANT</code>，InnoDB有单个索引最大字节数 768 的限制，而字段定义的是能存储的字符数，比如 <code>VARCHAR(200)</code> 代表能够存200个汉字，索引定义是字符集类型最大长度算的，即 utf8 maxbytes=3, utf8mb4 maxbytes=4，算下来utf8和utf8mb4两种情况的索引长度分别为600 bytes和800bytes，后者超过了768，导致出错：<code>Error 1071: Specified key was too long; max key length is 767 bytes</code>。 <code>COMPRESSED</code>和<code>DYNAMIC</code>格式不受限制，但也依然不建议索引太长，太浪费空间和cpu搜索资源。 如果已有定义超过这个长度的，可加上前缀索引，如果暂不能加上前缀索引（像唯一索引），可把该字段的字符集改回utf8或latin1。 但是，（ <strong>敲黑板啦，很重要</strong> ），要防止出现 <code>Illegal mix of collations (utf8_general_ci,IMPLICIT) and (utf8mb4_general_ci,COERCIBLE) for operation &#39;=&#39;</code> 错误：连接字符集使用utf8mb4，但 SELECT/UPDATE where条件有utf8类型的列，且条件右边存在不属于utf8字符，就会触发该异常。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://zhuochengwo.github.io/blog/2018/07/11/%E6%B7%B1%E5%9C%B3-%E5%B0%8F%E5%8D%97%E5%B1%B1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="Chengfeng">
+      <meta itemprop="description" content="生活的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="程枫的个人博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/blog/2018/07/11/%E6%B7%B1%E5%9C%B3-%E5%B0%8F%E5%8D%97%E5%B1%B1/" class="post-title-link" itemprop="url">深圳-小南山</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-07-11 20:21:55" itemprop="dateCreated datePublished" datetime="2018-07-11T20:21:55+08:00">2018-07-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-12-15 15:10:03" itemprop="dateModified" datetime="2020-12-15T15:10:03+08:00">2020-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/%E7%94%9F%E6%B4%BB/" itemprop="url" rel="index"><span itemprop="name">生活</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/%E8%B5%B0%E8%B5%B0%E7%9C%8B%E7%9C%8B/" itemprop="url" rel="index"><span itemprop="name">走走看看</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>之前一直去的文天祥纪念公园（赤湾山），去的次数也是相当多，每次望向远方，被前方的小南山挡住的时候就想爬一次小南上一探究竟，不过每次到了赤湾站就直奔赤湾山了。</p>
+<p>在某一个周末，终于坚定的决定这次去小南山。 去的路线跟去赤湾山差不多，地铁还是只能到赤湾站，公交的话可以到赤湾总站，这这些站出发去往小南山登山入口还有一段不小的距离。上山路线应该是有两条，我暂时还只走过其中一条，是全台阶的路，有九百来级，另一条路是水泥路，可以开车上去的。走台阶路还是挺辛苦的，路比较陡，我上去大概花了30来分钟，中间还歇了好几次，主要是太热，大汉淋漓。 </p>
+<p>上山的路上，风景一般，两边的树木已经完全涨起来了，不少地方往上看不到天。有几块比较开阔的地方能看到赤湾港的也被输电线给遮挡了，谁让这里是一条输电线路呢。山顶有个小亭子，风景宜人，视野开阔，赤湾港及远处的珠江入海口一览无余。我去的那天天气不错，连珠港澳大桥都可以看到。 这次也没干别的，因为我是有备而来的，就是想拍一个港口的延时，于是花了一个多小时，拍出了下边的效果。</p>
+<p><video controls="controls" width="100%" height="100%"><span data-mce-type="bookmark" style="display: inline-block; width: 0px; overflow: hidden; line-height: 0;" class="mce_SELRES_start">﻿</span></p>
+<source src="https://blog-1252719385.cos.ap-guangzhou.myqcloud.com/video/%E5%B0%8F%E5%8D%97%E5%B1%B1.MOV" /></video>
+
+<p> 视频其实有点小遗憾，定时拍摄设置了120张的最大值，忘了改了，导致中间停顿了几分钟没有拍，合成到视频里的效果就会看到视频闪了一下，能明显的感觉到不连贯。 同样的，小南山人不多，喜欢清静的可以一试。遗憾的是夏天是拍不到夕阳的，刚好被树给遮挡了，山顶的炮台位置，可以看到城市风光，却也被输电线路毁了。要是什么时候输电线路该走了，小南山便会有的表现。</p>
+<p> 整体来说，选择一个好天气，小南山还是非常值得一去的。</p>
 
       
     </div>
@@ -1140,7 +1144,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives/">
         
-          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-count">43</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
