@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zhuochengwo.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近看了点 docker 相关的知识，就想着用 docker 来搭建一个 lnmp 的开发环境。 不多说，动手搞起。 因为我的宿主机是 ubuntu 的，之前已经安装好了 docker，就不再介绍 docker 的安装了，还没有安装 docker 的话可以参考官方的安装教程。这里主要介绍依次安装MySQL，PHP，NGINX的 docker 容器，顺序上要注意，因为容器之前互相是有依赖的。   1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用docker搭建lnmp环境">
+<meta property="og:url" content="https://zhuochengwo.github.io/blog/2018/05/02/%E4%BD%BF%E7%94%A8docker%E6%90%AD%E5%BB%BAlnmp%E7%8E%AF%E5%A2%83/index.html">
+<meta property="og:site_name" content="程枫的个人博客">
+<meta property="og:description" content="最近看了点 docker 相关的知识，就想着用 docker 来搭建一个 lnmp 的开发环境。 不多说，动手搞起。 因为我的宿主机是 ubuntu 的，之前已经安装好了 docker，就不再介绍 docker 的安装了，还没有安装 docker 的话可以参考官方的安装教程。这里主要介绍依次安装MySQL，PHP，NGINX的 docker 容器，顺序上要注意，因为容器之前互相是有依赖的。   1">
+<meta property="og:locale">
+<meta property="article:published_time" content="2018-05-02T11:00:11.000Z">
+<meta property="article:modified_time" content="2020-12-15T05:45:28.655Z">
+<meta property="article:author" content="Chengfeng">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="PHP">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://zhuochengwo.github.io/blog/2018/05/02/%E4%BD%BF%E7%94%A8docker%E6%90%AD%E5%BB%BAlnmp%E7%8E%AF%E5%A2%83/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>使用docker搭建lnmp环境 | 程枫的个人博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">程枫的个人博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://zhuochengwo.github.io/blog/2018/05/02/%E4%BD%BF%E7%94%A8docker%E6%90%AD%E5%BB%BAlnmp%E7%8E%AF%E5%A2%83/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="Chengfeng">
+      <meta itemprop="description" content="生活的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="程枫的个人博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用docker搭建lnmp环境
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-05-02 19:00:11" itemprop="dateCreated datePublished" datetime="2018-05-02T19:00:11+08:00">2018-05-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/%E6%95%B2%E4%BB%A3%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">敲代码</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看了点 <strong>docker</strong> 相关的知识，就想着用 <strong>docker</strong> 来搭建一个 <strong>lnmp</strong> 的开发环境。 不多说，动手搞起。 因为我的宿主机是 <strong>ubuntu</strong> 的，之前已经安装好了 <strong>docker</strong>，就不再介绍 <strong>docker</strong> 的安装了，还没有安装 <strong>docker</strong> 的话可以参考官方的<a target="_blank" rel="noopener" href="https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-using-the-repository">安装教程</a>。这里主要介绍依次安装<strong>MySQL</strong>，<strong>PHP</strong>，<strong>NGINX</strong>的 <strong>docker</strong> 容器，顺序上要注意，因为容器之前互相是有依赖的。  </p>
+<h2 id="1、mysql"><a href="#1、mysql" class="headerlink" title="1、mysql"></a><strong>1、mysql</strong></h2><h3 id="1-1拉取-mysql-官方的镜像"><a href="#1-1拉取-mysql-官方的镜像" class="headerlink" title="1.1拉取 mysql 官方的镜像"></a>1.1拉取 <strong>mysql</strong> 官方的镜像</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull registry.docker-cn.com/library/mysql:5.7.22</span><br></pre></td></tr></table></figure>
+
+<p>这里使用国内的镜像加速，不然慢死。直接指定镜像源即可。<strong>mysql:least</strong> 已经到 <strong>8.0.11</strong> 了，这里不想使用 <strong>mysql 8</strong>，所以指定 <strong>mysql</strong> 的版本是 <strong>5.7.22</strong> <strong>执行结果：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">5.7.22: Pulling from library/mysql</span><br><span class="line">f2aa67a397c4: Pull complete </span><br><span class="line">1accf44cb7e0: Pull complete </span><br><span class="line">2d830ea9fa68: Pull complete </span><br><span class="line">740584693b89: Pull complete </span><br><span class="line">4d620357ec48: Pull complete </span><br><span class="line">ac3b7158d73d: Pull complete </span><br><span class="line">a48d784ee503: Pull complete </span><br><span class="line">bf1194add2f3: Pull complete </span><br><span class="line">0e5c74178a02: Pull complete </span><br><span class="line">c1614226503e: Pull complete </span><br><span class="line">0038589109a0: Pull complete </span><br><span class="line">Digest: sha256:e3ce1b609c9275ed24afb3465a9dd73cce38385e64c94755edd5e596a5c1bc8c</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> registry.docker-cn.com/library/mysql:5.7.22</span><br></pre></td></tr></table></figure>
+
+<p>可以通过 <strong>docker images</strong> 查看 <strong>pull</strong> 下来的镜像。</p>
+<h3 id="1-2创建-mysql-容器："><a href="#1-2创建-mysql-容器：" class="headerlink" title="1.2创建 mysql 容器："></a>1.2创建 <strong>mysql</strong> 容器：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name dmysql -v /data/mysql/etc:/etc/mysql/conf.d -v /data/mysql/<span class="built_in">log</span>:/var/<span class="built_in">log</span>/mysql -v /data/mysql/data:/var/lib/mysql -p 3307:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7.22</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数说明</strong> <strong>-d</strong> 让容器在后台运行 <strong>-p</strong> 添加主机到容器的端口映射，映射容器的3306到宿主机的3307端口 <strong>-v</strong> 挂载目录（目录映射），这样宿主机和容器内的这些目录是同步的。这里挂载了     <strong>mysql</strong> 的配置、数据和日志到 <strong>/data/mysql/</strong> 下 <strong>--name</strong> 容器的名字，随便取但必须唯一 <strong>-e</strong> 环境变量， <strong>MYSQL_ROOT_PASSWORD</strong> 用于初始化 <strong>mysql root</strong> 用户密码，方便待会儿登录进去 <strong>执行结果：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Unable to find image <span class="string">&#x27;mysql:5.7.22&#x27;</span> locally</span><br><span class="line">5.7.22: Pulling from library/mysql</span><br><span class="line">Digest: sha256:e3ce1b609c9275ed24afb3465a9dd73cce38385e64c94755edd5e596a5c1bc8c</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> mysql:5.7.22</span><br><span class="line">b8d88d9315bf78299efbdab1759668365b5d127f6d6c4619be51942c597d7c2d</span><br></pre></td></tr></table></figure>
+
+<p><strong>docker ps -a</strong>查看容器信息:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES</span><br><span class="line">b8d88d9315bf mysql:5.7.22 <span class="string">&quot;docker-entrypoint...&quot;</span> About a minute ago Up About a minute 0.0.0.0:3307-&gt;3306/tcp dmysql</span><br></pre></td></tr></table></figure>
+
+<p>使用 <strong>docker exec -it dmysql /bin/bash</strong> 进入到 <strong>mysql</strong> 容器，这里的 <strong>dmysql</strong> 是创建容器时取的名字，也可以使用容器 <strong>id (b8d88d9315bf)</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it dmysql /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p><strong>mysql -uroot -p</strong> 登录 <strong>mysql</strong> 创建容器的时候将容器内的 <strong>3306</strong> 端口映射到了宿主机的 <strong>3307</strong>，我们也可以直接在宿主机连接容器内的mysql，<strong>但要注意指定 host 127.0.0.1 ,默认使用 localhost 是会无法连接成功的</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -uroot -h127.0.0.1 -P3307 -p</span><br></pre></td></tr></table></figure>
+
+<p>使用默认的 <strong>localhost</strong> 的话需要指定 <strong>tcp</strong> 协议连接</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -uroot -P3307 --protocol=tcp -p</span><br></pre></td></tr></table></figure>
+
+<p> </p>
+<h2 id="2、php"><a href="#2、php" class="headerlink" title="2、php"></a><strong>2、php</strong></h2><h3 id="2-1拉取-php-fpm-镜像"><a href="#2-1拉取-php-fpm-镜像" class="headerlink" title="2.1拉取 php-fpm 镜像"></a>2.1拉取 php-fpm 镜像</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull registry.docker-cn.com/library/php:7.2-fpm</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">7.2-fpm: Pulling from library/php</span><br><span class="line">f2aa67a397c4: Already exists </span><br><span class="line">c533bdb78a46: Pull complete </span><br><span class="line">65a7293804ac: Pull complete </span><br><span class="line">35a9c1f94aea: Pull complete </span><br><span class="line">e8295a1cf501: Pull complete </span><br><span class="line">ecfd4131d449: Pull complete </span><br><span class="line">de975577344b: Pull complete </span><br><span class="line">6343baa4101d: Pull complete </span><br><span class="line">ba60ddde6cbf: Pull complete </span><br><span class="line">ac788da5f2b6: Pull complete </span><br><span class="line">05e19938fedb: Pull complete </span><br><span class="line">Digest: sha256:9c07d6f27ca1076bade65669e289180e06ab04022b64b97e6c406c9810cde672</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> registry.docker-cn.com/library/php:7.2-fpm</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2创建镜像"><a href="#2-2创建镜像" class="headerlink" title="2.2创建镜像"></a>2.2创建镜像</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name dphp --link dmysql:mysql -v /data/php/project:/var/www/html -p 9001:9000 -d php:7.2-fpm</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数说明:</strong> <strong>--link</strong> 与另外一个容器建立起联系，这样就可以在当前容器使用另一个容器的服务。这里使用 <strong>dmysql</strong> 容器并在 <strong>dphp</strong> 容器中命名为 <strong>mysql</strong> 这里挂载了项目目录，方便执行 <strong>php</strong> 代码。 <strong>执行结果：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Unable to find image <span class="string">&#x27;php:7.2-fpm&#x27;</span> locally</span><br><span class="line">7.2-fpm: Pulling from library/php</span><br><span class="line">Digest: sha256:9c07d6f27ca1076bade65669e289180e06ab04022b64b97e6c406c9810cde672</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> php:7.2-fpm</span><br><span class="line">5b18f3ff8b070e42bd149888506a8e3f62a062d22af9921c58a2e81e94cfc364</span><br></pre></td></tr></table></figure>
+
+<p>这样 <strong>php</strong> 的容器就运行起来的，同样可以通过 <strong>docker exec</strong> 进入容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it dphp /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>进入容器后通过 <strong>php -m</strong> 发现没有安装 <strong>pdo_msyql</strong> 扩展，这里需要通过容器内置的工具安装 <strong>php</strong> 的扩展。<strong>注意容器内置工具 <a target="_blank" rel="noopener" href="https://hub.docker.com/_/php/">docker-php-ext-install </a> 的使用及扩展配置。</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-php-ext-install pdo_mysql</span><br></pre></td></tr></table></figure>
+
+<p>再通过 <strong>php -m</strong> 就可以看到扩展已经装上了 通过 <strong>docker restart dphp</strong> 重启容器来重启 <strong>php-fpm</strong>，否则新安装的扩展不会生效</p>
+<h2 id="3、nginx"><a href="#3、nginx" class="headerlink" title="3、nginx"></a><strong>3、nginx</strong></h2><h3 id="3-1拉取-nginx-镜像"><a href="#3-1拉取-nginx-镜像" class="headerlink" title="3.1拉取 nginx 镜像"></a>3.1拉取 <strong>nginx</strong> 镜像</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull registry.docker-cn.com/library/nginx</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">nginx docker pull registry.docker-cn.com/library/nginx </span><br><span class="line">Using default tag: latest</span><br><span class="line">latest: Pulling from library/nginx</span><br><span class="line">f2aa67a397c4: Already exists </span><br><span class="line">3c091c23e29d: Pull complete </span><br><span class="line">4a99993b8636: Pull complete </span><br><span class="line">Digest: sha256:0fb320e2a1b1620b4905facb3447e3d84ad36da0b2c8aa8fe3a5a81d1187b884</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> registry.docker-cn.com/library/nginx:latest</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2创建-nginx-容器"><a href="#3-2创建-nginx-容器" class="headerlink" title="3.2创建 nginx 容器"></a>3.2创建 <strong>nginx</strong> 容器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -itd --name dnginx -v /data/php/project:/var/www/html --link dphp:phpfpm -p 8090:80 nginx</span><br></pre></td></tr></table></figure>
+
+<p>进入 <strong>nginx</strong> 容器,修改 <strong>/etc/nginx/conf.d/default.cnf</strong> 。<strong>这里有一点需要特别注意，fastcgi_pass 填入的是 phpfpm:9000，不能直接使用 php 容器的 ip，这里的 phpfpm 是 dphp 容器在 dnginx 容器中的名称</strong></p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">location</span> <span class="regexp">~ \.php$</span> &#123;</span><br><span class="line">    <span class="attribute">root</span> /var/www/html;</span><br><span class="line">    <span class="attribute">fastcgi_pass</span> phpfpm:<span class="number">9000</span>;</span><br><span class="line">    <span class="attribute">fastcgi_index</span> index.php;</span><br><span class="line">    <span class="attribute">fastcgi_param</span> SCRIPT_FILENAME $document_root$fastcgi_script_name;</span><br><span class="line">    <span class="attribute">include</span> fastcgi_params;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3重载配置："><a href="#3-3重载配置：" class="headerlink" title="3.3重载配置："></a><strong>3.3重载配置：</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service nginx reload</span><br></pre></td></tr></table></figure>
+
+<p>因为已经在 <strong>dnginx</strong> 容器中挂载了宿主机的 <strong>/data/php/project</strong> 目录到容器 <strong>/var/www/html</strong> ，我们可以在宿主机的此目录下创建项目文件，就可以在 <strong>dnginx</strong> 中访问到了。在宿主机 <strong>/data/php/project</strong> 下新建 <strong>index.php</strong> 文件并简单打印数据库 <strong>user</strong> 的相关信息以便测试三个容器正常工作。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="variable">$con</span> = <span class="keyword">new</span> PDO(<span class="string">&#x27;mysql:host=mysql;dbname=mysql&#x27;</span>, <span class="string">&#x27;root&#x27;</span>, <span class="string">&#x27;123456&#x27;</span>);</span><br><span class="line">    <span class="variable">$con</span>-&gt;query(<span class="string">&#x27;SET NAMES UTF8&#x27;</span>);</span><br><span class="line">    <span class="variable">$res</span> =  <span class="variable">$con</span>-&gt;query(<span class="string">&#x27;SELECT * FROM `user` WHERE User=&quot;root&quot;&#x27;</span>);</span><br><span class="line">    <span class="keyword">while</span> (<span class="variable">$row</span> = <span class="variable">$res</span>-&gt;fetch(PDO::FETCH_ASSOC)) &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&quot;User:<span class="subst">&#123;$row[&#x27;User&#x27;]&#125;</span>  Host:<span class="subst">&#123;$row[&#x27;Host&#x27;]&#125;</span>\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="keyword">catch</span> (PDOException <span class="variable">$e</span>) &#123;</span><br><span class="line">     <span class="keyword">echo</span> <span class="string">&#x27;错误原因：&#x27;</span>  . <span class="variable">$e</span>-&gt;getMessage();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在宿主机通过 <strong>curl <a target="_blank" rel="noopener" href="http://localhost:8090/index.php">http://localhost:8090/index.php</a></strong>测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl http://localhost:8090/index.php</span><br><span class="line">User:root Host:localhost</span><br><span class="line">User:root Host:%</span><br></pre></td></tr></table></figure>
+
+<p>这里可以看到成功的从 <strong>mysql</strong> 数据库中查出了 <strong>user</strong> 信息，至此 <strong>docker</strong> 的 <strong>lnmp</strong> 已经搭建完成。 有几个地方需要注意，一般我们会把容器内配置，数据，日志单独挂载到物理机或者单独的数据卷，如本文例子中 <strong>nginx</strong> 的配置是在容器内的，其实是不建议这样做的，进入容器修改配置我们还需要单独安装 <strong>vim</strong>，还有就是 <strong>nginx</strong> 的日志，默认是会直接输出到 <strong>docker log</strong> 的，需要通过 <strong>docker logs nginx</strong> 容器名来查看日志。再一个就是容器的监控， <strong>docker</strong> 有自带的 <a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/builder/#healthcheck">healthcheck</a>，也是需要了解的。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Docker/" rel="tag"># Docker</a>
+              <a href="/blog/tags/PHP/" rel="tag"># PHP</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/2018/05/02/ubuntu%E5%8D%87%E7%BA%A718-04%E8%B8%A9%E7%9A%84%E5%9D%91/" rel="prev" title="ubuntu升级18.04进不了桌面">
+      <i class="fa fa-chevron-left"></i> ubuntu升级18.04进不了桌面
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/2018/05/06/php%E5%A4%9A%E8%BF%9B%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%88%9D%E6%8E%A2/" rel="next" title="php多进程编程初探">
+      php多进程编程初探 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81mysql"><span class="nav-number">1.</span> <span class="nav-text">1、mysql</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1%E6%8B%89%E5%8F%96-mysql-%E5%AE%98%E6%96%B9%E7%9A%84%E9%95%9C%E5%83%8F"><span class="nav-number">1.1.</span> <span class="nav-text">1.1拉取 mysql 官方的镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2%E5%88%9B%E5%BB%BA-mysql-%E5%AE%B9%E5%99%A8%EF%BC%9A"><span class="nav-number">1.2.</span> <span class="nav-text">1.2创建 mysql 容器：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81php"><span class="nav-number">2.</span> <span class="nav-text">2、php</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1%E6%8B%89%E5%8F%96-php-fpm-%E9%95%9C%E5%83%8F"><span class="nav-number">2.1.</span> <span class="nav-text">2.1拉取 php-fpm 镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2%E5%88%9B%E5%BB%BA%E9%95%9C%E5%83%8F"><span class="nav-number">2.2.</span> <span class="nav-text">2.2创建镜像</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81nginx"><span class="nav-number">3.</span> <span class="nav-text">3、nginx</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1%E6%8B%89%E5%8F%96-nginx-%E9%95%9C%E5%83%8F"><span class="nav-number">3.1.</span> <span class="nav-text">3.1拉取 nginx 镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2%E5%88%9B%E5%BB%BA-nginx-%E5%AE%B9%E5%99%A8"><span class="nav-number">3.2.</span> <span class="nav-text">3.2创建 nginx 容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3%E9%87%8D%E8%BD%BD%E9%85%8D%E7%BD%AE%EF%BC%9A"><span class="nav-number">3.3.</span> <span class="nav-text">3.3重载配置：</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Chengfeng</p>
+  <div class="site-description" itemprop="description">生活的点点滴滴</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Chengfeng</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

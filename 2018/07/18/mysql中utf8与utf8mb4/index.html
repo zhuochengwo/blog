@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zhuochengwo.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="开发过微信相关的应该都知道，微信昵称中的emoji表情要想保存到MySQL数据库中，使用utf8编码是不行的，需要修改库表字符编码为utf8mb4。以前碰到这个问题的时候也没有深究，只是知道utf8mb4支持的范围比utf8更广。 直到今天看到infoQ的一篇文章记住，永远不要在MySQL中使用“utf8” ，才认真的看了下MySQL utf8与utf8mb4的问题。 标准utf8编码使用14个字">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL中utf8与utf8mb4">
+<meta property="og:url" content="https://zhuochengwo.github.io/blog/2018/07/18/mysql%E4%B8%ADutf8%E4%B8%8Eutf8mb4/index.html">
+<meta property="og:site_name" content="程枫的个人博客">
+<meta property="og:description" content="开发过微信相关的应该都知道，微信昵称中的emoji表情要想保存到MySQL数据库中，使用utf8编码是不行的，需要修改库表字符编码为utf8mb4。以前碰到这个问题的时候也没有深究，只是知道utf8mb4支持的范围比utf8更广。 直到今天看到infoQ的一篇文章记住，永远不要在MySQL中使用“utf8” ，才认真的看了下MySQL utf8与utf8mb4的问题。 标准utf8编码使用14个字">
+<meta property="og:locale">
+<meta property="article:published_time" content="2018-07-18T03:29:41.000Z">
+<meta property="article:modified_time" content="2020-12-15T05:45:28.643Z">
+<meta property="article:author" content="Chengfeng">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://zhuochengwo.github.io/blog/2018/07/18/mysql%E4%B8%ADutf8%E4%B8%8Eutf8mb4/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>MySQL中utf8与utf8mb4 | 程枫的个人博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">程枫的个人博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://zhuochengwo.github.io/blog/2018/07/18/mysql%E4%B8%ADutf8%E4%B8%8Eutf8mb4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="Chengfeng">
+      <meta itemprop="description" content="生活的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="程枫的个人博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL中utf8与utf8mb4
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-07-18 11:29:41" itemprop="dateCreated datePublished" datetime="2018-07-18T11:29:41+08:00">2018-07-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/%E6%95%B2%E4%BB%A3%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">敲代码</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>开发过微信相关的应该都知道，微信昵称中的emoji表情要想保存到MySQL数据库中，使用utf8编码是不行的，需要修改库表字符编码为utf8mb4。以前碰到这个问题的时候也没有深究，只是知道utf8mb4支持的范围比utf8更广。 直到今天看到infoQ的一篇文章<a target="_blank" rel="noopener" href="http://www.infoq.com/cn/articles/in-mysql-never-use-utf8-use-utf8">记住，永远不要在MySQL中使用“utf8”</a> ，才认真的看了下MySQL utf8与utf8mb4的问题。 标准utf8编码使用1<del>4个字节表示字符，如1个字节表示数字和英文字母，使用3</del>4个字节表示一个汉字。</p>
+<h3 id="MySQL-utf8与utf8mb4"><a href="#MySQL-utf8与utf8mb4" class="headerlink" title="MySQL utf8与utf8mb4"></a>MySQL utf8与utf8mb4</h3><p>关于MySQL utf8与utf8mb4的区别，<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.6/en/charset-unicode-utf8mb4.html">官方文档</a>是这样说的：</p>
+<blockquote>
+<p>The <code>utfmb4</code> character set has these characteristics:</p>
+<ul>
+<li>  Supports BMP and supplementary characters.</li>
+<li>  Requires a maximum of four bytes per multibyte character.</li>
+</ul>
+<p><code>utf8mb4</code> contrasts with the <code>utf8mb3</code> character set, which supports only BMP characters and uses a maximum of three bytes per character:</p>
+</blockquote>
+<blockquote>
+<ul>
+<li>  For a BMP character, <code>utf8mb4</code> and <code>utf8mb3</code> have identical storage characteristics: same code values, same encoding, same length.</li>
+<li>  For a supplementary character, <code>utf8mb4</code> requires four bytes to store it, whereas <code>utf8mb3</code> cannot store the character at all. When converting <code>utf8mb3</code> columns to<code>utf8mb4</code>, you need not worry about converting supplementary characters because there will be none.</li>
+</ul>
+</blockquote>
+<p>mysql支持的 utf8 编码最大字符长度为 3 字节，如果遇到 4 字节的宽字符就会有问题了。MySQL在5.5.3之后增加了这个utf8mb4的编码，mb4就是most bytes 4的意思，专门用来兼容四字节的unicode。其实utf8是utf8mb3的别名，utf8mb4就是utf8的超集并完全兼容utf8，也是真正意义上符合标准utf8编码的。 为了更好的兼容性，应使用 utf8mb4，同时要注意连接字符集也要设置为utf8mb4，否则在 严格模式 下会出现 <code>Incorrect string value: /xF0/xA1/x8B/xBE/xE5/xA2… for column &#39;name&#39;</code>这样的错误，非严格模式下此后的数据会被截断。 还有一点需要注意的是，对于 CHAR 类型数据，utf8mb4 会多消耗一些空间，根据 Mysql 官方建议，使用 VARCHAR  替代 CHAR。</p>
+<h3 id="utf8升级utf8mb4具体步骤"><a href="#utf8升级utf8mb4具体步骤" class="headerlink" title="utf8升级utf8mb4具体步骤"></a>utf8升级utf8mb4具体步骤</h3><p>SQL 语句如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改数据库:</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">DATABASE</span> database_name <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> = utf8mb4 <span class="keyword">COLLATE</span> = utf8mb4_unicode_ci;  </span><br><span class="line"><span class="comment"># 修改表:</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> table_name <span class="keyword">CONVERT</span> <span class="keyword">TO</span> <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> utf8mb4 <span class="keyword">COLLATE</span> utf8mb4_unicode_ci;</span><br><span class="line"><span class="comment"># 修改表字段:</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> table_name <span class="keyword">CHANGE</span> column_name column_name <span class="built_in">VARCHAR</span>(<span class="number">191</span>) <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> utf8mb4 <span class="keyword">COLLATE</span> utf8mb4_unicode_ci;</span><br></pre></td></tr></table></figure>
+
+<p>修改MySQL配置文件 新增如下参数：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">default-character-<span class="keyword">set</span> = utf8mb4</span><br><span class="line">default-character-<span class="keyword">set</span> = utf8mb4</span><br><span class="line">character-<span class="keyword">set</span>-client-handshake = FALSE</span><br><span class="line">character-<span class="keyword">set</span>-server = utf8mb4</span><br><span class="line">collation-server = utf8mb4_unicode_ci</span><br><span class="line">init_connect=<span class="string">&#x27;SET NAMES utf8mb4</span></span><br></pre></td></tr></table></figure>
+
+<p>检查环境变量 和测试 SQL 如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> <span class="keyword">VARIABLES</span> <span class="keyword">WHERE</span> Variable_name <span class="keyword">LIKE</span> <span class="string">&#x27;character\_set\_%&#x27;</span> <span class="keyword">OR</span> Variable_name <span class="keyword">LIKE</span> <span class="string">&#x27;collation%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="key-768-long-错误"><a href="#key-768-long-错误" class="headerlink" title="key 768 long 错误"></a>key 768 long 错误</h3><p>字符集从utf8转到utf8mb4之后，最容易引起的就是索引键超长的问题。 对于表行格式是 <code>COMPACT</code>或 <code>REDUNDANT</code>，InnoDB有单个索引最大字节数 768 的限制，而字段定义的是能存储的字符数，比如 <code>VARCHAR(200)</code> 代表能够存200个汉字，索引定义是字符集类型最大长度算的，即 utf8 maxbytes=3, utf8mb4 maxbytes=4，算下来utf8和utf8mb4两种情况的索引长度分别为600 bytes和800bytes，后者超过了768，导致出错：<code>Error 1071: Specified key was too long; max key length is 767 bytes</code>。 <code>COMPRESSED</code>和<code>DYNAMIC</code>格式不受限制，但也依然不建议索引太长，太浪费空间和cpu搜索资源。 如果已有定义超过这个长度的，可加上前缀索引，如果暂不能加上前缀索引（像唯一索引），可把该字段的字符集改回utf8或latin1。 但是，（ <strong>敲黑板啦，很重要</strong> ），要防止出现 <code>Illegal mix of collations (utf8_general_ci,IMPLICIT) and (utf8mb4_general_ci,COERCIBLE) for operation &#39;=&#39;</code> 错误：连接字符集使用utf8mb4，但 SELECT/UPDATE where条件有utf8类型的列，且条件右边存在不属于utf8字符，就会触发该异常。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/MySQL/" rel="tag"># MySQL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/2018/07/11/%E6%B7%B1%E5%9C%B3-%E5%B0%8F%E5%8D%97%E5%B1%B1/" rel="prev" title="深圳-小南山">
+      <i class="fa fa-chevron-left"></i> 深圳-小南山
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/2018/08/13/css3-transition%E5%AE%9E%E7%8E%B0heightauto%E8%BF%87%E6%B8%A1%E6%95%88%E6%9E%9C/" rel="next" title="CSS3 transition实现height:auto过渡效果">
+      CSS3 transition实现height:auto过渡效果 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL-utf8%E4%B8%8Eutf8mb4"><span class="nav-number">1.</span> <span class="nav-text">MySQL utf8与utf8mb4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#utf8%E5%8D%87%E7%BA%A7utf8mb4%E5%85%B7%E4%BD%93%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.</span> <span class="nav-text">utf8升级utf8mb4具体步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#key-768-long-%E9%94%99%E8%AF%AF"><span class="nav-number">3.</span> <span class="nav-text">key 768 long 错误</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Chengfeng</p>
+  <div class="site-description" itemprop="description">生活的点点滴滴</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Chengfeng</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

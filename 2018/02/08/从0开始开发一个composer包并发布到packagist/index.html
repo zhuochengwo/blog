@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zhuochengwo.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="composer包对于php来说是革命性的，平常我们开发都会用到各种各样的composer包，现在我们来着手从0开始开发一个php的composer包。 首先安装composer 已经安装了的话请跳过。 几行命令就搞定了，不解释，关于composer的更多内容可以参考composer官方介绍 12345php -r &quot;copy(&amp;#x27;https:&#x2F;&#x2F;getcomposer.org&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从0开始开发一个composer包并发布到packagist">
+<meta property="og:url" content="https://zhuochengwo.github.io/blog/2018/02/08/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AAcomposer%E5%8C%85%E5%B9%B6%E5%8F%91%E5%B8%83%E5%88%B0packagist/index.html">
+<meta property="og:site_name" content="程枫的个人博客">
+<meta property="og:description" content="composer包对于php来说是革命性的，平常我们开发都会用到各种各样的composer包，现在我们来着手从0开始开发一个php的composer包。 首先安装composer 已经安装了的话请跳过。 几行命令就搞定了，不解释，关于composer的更多内容可以参考composer官方介绍 12345php -r &quot;copy(&amp;#x27;https:&#x2F;&#x2F;getcomposer.org&#x2F;">
+<meta property="og:locale">
+<meta property="og:image" content="https://blog-1252719385.cos.ap-guangzhou.myqcloud.com/images/20180208194939.png">
+<meta property="article:published_time" content="2018-02-08T05:49:06.000Z">
+<meta property="article:modified_time" content="2020-12-15T05:45:28.655Z">
+<meta property="article:author" content="Chengfeng">
+<meta property="article:tag" content="PHP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog-1252719385.cos.ap-guangzhou.myqcloud.com/images/20180208194939.png">
+
+<link rel="canonical" href="https://zhuochengwo.github.io/blog/2018/02/08/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AAcomposer%E5%8C%85%E5%B9%B6%E5%8F%91%E5%B8%83%E5%88%B0packagist/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>从0开始开发一个composer包并发布到packagist | 程枫的个人博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">程枫的个人博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://zhuochengwo.github.io/blog/2018/02/08/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%BC%80%E5%8F%91%E4%B8%80%E4%B8%AAcomposer%E5%8C%85%E5%B9%B6%E5%8F%91%E5%B8%83%E5%88%B0packagist/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="Chengfeng">
+      <meta itemprop="description" content="生活的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="程枫的个人博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从0开始开发一个composer包并发布到packagist
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-02-08 13:49:06" itemprop="dateCreated datePublished" datetime="2018-02-08T13:49:06+08:00">2018-02-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/%E6%95%B2%E4%BB%A3%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">敲代码</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>composer包对于php来说是革命性的，平常我们开发都会用到各种各样的composer包，现在我们来着手从0开始开发一个php的composer包。 <strong>首先安装composer</strong> 已经安装了的话请跳过。 几行命令就搞定了，不解释，关于composer的更多内容可以参考<a target="_blank" rel="noopener" href="https://getcomposer.org/">composer</a>官方介绍</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">php -r <span class="string">&quot;copy(&#x27;https://getcomposer.org/installer&#x27;, &#x27;composer-setup.php&#x27;);&quot;</span></span><br><span class="line">php -r <span class="string">&quot;if (hash_file(&#x27;SHA384&#x27;, &#x27;composer-setup.php&#x27;) === &#x27;544e09ee996cdf60ece3804abc52599c22b1f40f4323403c44d44fdfdd586475ca9813a858088ffbc1f233e9b180f061&#x27;) &#123; echo &#x27;Installer verified&#x27;; &#125; else &#123; echo &#x27;Installer corrupt&#x27;; unlink(&#x27;composer-setup.php&#x27;); &#125; echo PHP_EOL;&quot;</span></span><br><span class="line">php composer-setup.php</span><br><span class="line">php -r <span class="string">&quot;unlink(&#x27;composer-setup.php&#x27;);&quot;</span></span><br><span class="line">sudo mv composer.phar /usr/bin/composer</span><br></pre></td></tr></table></figure>
+
+<p>由于众所周知的原因，我们把默认的包镜像源换成国内的</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">composer config -g repo.packagist composer https://packagist.phpcomposer.com</span><br></pre></td></tr></table></figure>
+
+<p><strong>初始化composer.json</strong> 我们可以使用composer自带的composer init初始化项目，非常方便。它支持以下参数，也可以不带参数而通过交互模式输入，可以通过composer init –help查看详细介绍</p>
+<ul>
+<li>  <code>--name</code> - 包的名称</li>
+<li>  <code>--description</code> - 包的描述</li>
+<li>  <code>--author</code> - 包的作者</li>
+<li>  <code>--homepage</code> - 包的主页</li>
+<li>  <code>--require</code> - 需要依赖的其它包,必须要有一个版本约束,并且应该遵循 foo/bar:1.0.0 这样的格式</li>
+<li>  <code>--require-dev</code> - 开发版的依赖包,内容格式与 –require 相同</li>
+<li>  <code>--stability (-s)</code> - minimum-stability 字段的值</li>
+</ul>
+<p>初始化完后的composer.json大概是这个样子的：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;chengfeng/demo&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;description&quot;</span>: <span class="string">&quot;This project is for studying php composer package development.&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;type&quot;</span>: <span class="string">&quot;library&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;require&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;nesbot/carbon&quot;</span>: <span class="string">&quot;^1.22&quot;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">&quot;license&quot;</span>: <span class="string">&quot;MIT&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;authors&quot;</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;chengfeng&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;email&quot;</span>: <span class="string">&quot;****@gmail.com&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中关于minimun-stability的解释可以看这里 <a target="_blank" rel="noopener" href="https://docs.phpcomposer.com/04-schema.html#minimum-stability">https://docs.phpcomposer.com/04-schema.html#minimum-stability</a> 这里使用了默认的stable 这里我们尝试配置一个依赖carbon，也可以选择跳过，在初始化完后编辑composer.json添加依赖，或通过composer require安装 在项目根目录下新建src目录，用于存放项目源文件，在这里我们再建立一个Demo的目录并创建一个Demo.php的文件，稍后再来编写具体的逻辑。同时，再建立一个tests目录并创建DemoTest的测试用例文件，用于编写我们的test case。然后在composer.json配置好autoload，和autoload-dev。 autoload我们按照prs-4规范配置</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&quot;autoload&quot;: &#123;</span><br><span class="line">    &quot;psr-4&quot;: &#123;</span><br><span class="line">        &quot;Demo\\&quot;: &quot;src/Demo/&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br><span class="line">&quot;autoload-dev&quot;: &#123;</span><br><span class="line">    &quot;psr-4&quot;: &#123;</span><br><span class="line">        &quot;Test\\&quot;: &quot;tests/&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>composer install</code>安装项目所有依赖，到这里，前期的工作已经做完了，可以开始项目的开发。 现在,整个项目目录结构是这样的：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">demo</span><br><span class="line">    </span><br><span class="line">    -src</span><br><span class="line">       -Demo</span><br><span class="line">           -Demo.php</span><br><span class="line">       - ...</span><br><span class="line">       </span><br><span class="line">    -tests</span><br><span class="line">       -DemoTest.php</span><br><span class="line">       -...</span><br><span class="line">     </span><br><span class="line">    -verdor</span><br><span class="line">    -composer.json</span><br><span class="line">    -composer.lock</span><br><span class="line">    -</span><br></pre></td></tr></table></figure>
+
+<p><strong>配置phpunit</strong> 在开发中，可能会引入一些第三方包，但在生产环境又是不需要的，比如phpunit，我们可以通过–dev参数来安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">composer require phpunit/phpunit --dev</span><br></pre></td></tr></table></figure>
+
+<p>使用phpunit时可以提前配置phpunit.xml 以下是一个简单示例，具体配置可以参考phpunit文档</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;phpunit backupGlobals&#x3D;&quot;false&quot;</span><br><span class="line">         backupStaticAttributes&#x3D;&quot;false&quot;</span><br><span class="line">         bootstrap&#x3D;&quot;vendor&#x2F;autoload.php&quot;</span><br><span class="line">         colors&#x3D;&quot;true&quot;</span><br><span class="line">         convertErrorsToExceptions&#x3D;&quot;true&quot;</span><br><span class="line">         convertNoticesToExceptions&#x3D;&quot;true&quot;</span><br><span class="line">         convertWarningsToExceptions&#x3D;&quot;true&quot;</span><br><span class="line">         processIsolation&#x3D;&quot;false&quot;</span><br><span class="line">         stopOnFailure&#x3D;&quot;false&quot;</span><br><span class="line">&gt;</span><br><span class="line"></span><br><span class="line">    &lt;filter&gt;</span><br><span class="line">        &lt;whitelist&gt;</span><br><span class="line">            &lt;directory&gt;src&#x2F;Demo&lt;&#x2F;directory&gt;</span><br><span class="line">        &lt;&#x2F;whitelist&gt;</span><br><span class="line">    &lt;&#x2F;filter&gt;</span><br><span class="line"></span><br><span class="line">    &lt;testsuites&gt;</span><br><span class="line">        &lt;testsuite name&#x3D;&quot;Demo Test Suite&quot;&gt;</span><br><span class="line">            &lt;directory&gt;tests&lt;&#x2F;directory&gt;</span><br><span class="line">        &lt;&#x2F;testsuite&gt;</span><br><span class="line">    &lt;&#x2F;testsuites&gt;</span><br><span class="line">&lt;&#x2F;phpunit&gt;</span><br></pre></td></tr></table></figure>
+
+<p>配置好了phpunit，我们就可以通过./vendor/bin/phpunit来执行测试用例了。 <strong>正式开始写代码</strong> 在Demo.php中写一个简单的获取今天昨天明天日期的方法</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> <span class="title">Demo</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">use</span> <span class="title">Carbon</span>\<span class="title">Carbon</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Demo</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="built_in">static</span> <span class="function"><span class="keyword">function</span> <span class="title">getToday</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Carbon::today()-&gt;format(<span class="string">&#x27;Y-m-d&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="built_in">static</span> <span class="function"><span class="keyword">function</span> <span class="title">getYesterday</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Carbon::yesterday()-&gt;format(<span class="string">&#x27;Y-m-d&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="built_in">static</span> <span class="function"><span class="keyword">function</span> <span class="title">getTomorrow</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Carbon::tomorrow()-&gt;format(<span class="string">&#x27;Y-m-d&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>DemoTest.php写一个简单的测试用例</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">use</span> <span class="title">Demo</span>\<span class="title">Demo</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DemoTest</span> <span class="keyword">extends</span> \<span class="title">PHPUnit</span>\<span class="title">Framework</span>\<span class="title">TestCase</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">testToday</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable">$today</span> = date(<span class="string">&#x27;Y-m-d&#x27;</span>);</span><br><span class="line">        <span class="variable">$testToday</span> = Demo::getToday();</span><br><span class="line">        <span class="keyword">$this</span>-&gt;assertEquals(<span class="variable">$today</span>, <span class="variable">$testToday</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">testYesterday</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable">$yesterday</span> = date(<span class="string">&#x27;Y-m-d&#x27;</span>, time() - <span class="number">86400</span>);</span><br><span class="line">        <span class="variable">$testYesterday</span> = Demo::getYesterday();</span><br><span class="line">        <span class="keyword">$this</span>-&gt;assertEquals(<span class="variable">$yesterday</span>, <span class="variable">$testYesterday</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">testTomorrow</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable">$tomorrow</span> = date(<span class="string">&#x27;Y-m-d&#x27;</span>, time() + <span class="number">86400</span>);</span><br><span class="line">        <span class="variable">$testTomorrow</span> = Demo::getTomorrow();</span><br><span class="line">        <span class="keyword">$this</span>-&gt;assertEquals(<span class="variable">$tomorrow</span>, <span class="variable">$testTomorrow</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在可以执行下测试用例看看效果</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">demo ./vendor/bin/phpunit</span><br><span class="line">PHPUnit <span class="number">6.5</span>.<span class="number">6</span> by Sebastian Bergmann <span class="built_in">and</span> contributors.</span><br><span class="line"></span><br><span class="line">... <span class="number">3</span> / <span class="number">3</span> (<span class="number">100</span>%)</span><br><span class="line"></span><br><span class="line">Time: <span class="number">22</span> ms, Memory: <span class="number">4.00</span>MB</span><br><span class="line"></span><br><span class="line">OK (<span class="number">3</span> tests, <span class="number">3</span> assertions)</span><br></pre></td></tr></table></figure>
+
+<p>完美，测试用例全部通过。 我们也可以通过composer scripts来来定义一些脚步，参考carbon写了同样的配置</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&quot;scripts&quot;:&#123;</span><br><span class="line">    &quot;test&quot;: &quot;./vendor/bin/phpunit; ./vendor/bin/php-cs-fixer fix -v --diff --dry-run;&quot;,</span><br><span class="line">    &quot;phpunit&quot;: &quot;./vendor/bin/phpunit;&quot;,</span><br><span class="line">    &quot;phpcs&quot;: &quot;./vendor/bin/php-cs-fixer fix -v --diff --dry-run;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以通过composer run-script phpunit来执行单元测试了。关于script更多强大的功能可以参考 <a target="_blank" rel="noopener" href="https://docs.phpcomposer.com/04-schema.html#scripts">composer文档</a> 到这里，这个包已经开发完了。最后composer.json是这个样子的</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;chengfeng/demo&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;description&quot;</span>: <span class="string">&quot;This project is for studying php composer package development&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;type&quot;</span>: <span class="string">&quot;library&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;homepage&quot;</span>: <span class="string">&quot;https://chengfeng.site&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;require&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;nesbot/carbon&quot;</span>: <span class="string">&quot;^1.22&quot;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">&quot;license&quot;</span>: <span class="string">&quot;MIT&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;autoload&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;psr-4&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">&quot;Demo\\&quot;</span>: <span class="string">&quot;src/Demo/&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">&quot;autoload-dev&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;psr-4&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">&quot;Test\\&quot;</span>: <span class="string">&quot;tests/&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">&quot;authors&quot;</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;chengfeng&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;email&quot;</span>: <span class="string">&quot;drondyw@gmail.com&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">&quot;require-dev&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;phpunit/phpunit&quot;</span>: <span class="string">&quot;^6.5&quot;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">&quot;scripts&quot;</span>:&#123;</span><br><span class="line">        <span class="attr">&quot;test&quot;</span>: <span class="string">&quot;./vendor/bin/phpunit; ./vendor/bin/php-cs-fixer fix -v --diff --dry-run;&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;phpunit&quot;</span>: <span class="string">&quot;./vendor/bin/phpunit;&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;phpcs&quot;</span>: <span class="string">&quot;./vendor/bin/php-cs-fixer fix -v --diff --dry-run;&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>将代码提交到github</strong> 我们将提交到github，然后发布到packagist就可以了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">git init</span><br><span class="line">git remote add origin git@github.com:chengfengGit/demo.git</span><br><span class="line">vim gitignore <span class="comment">#忽略verdor文件和idea文件如.idea</span></span><br><span class="line">git add -A</span><br><span class="line">git commit -m <span class="string">&quot;+ demo&quot;</span></span><br><span class="line">git push origin master -u</span><br></pre></td></tr></table></figure>
+
+<p><strong>发布到packagist</strong> 访问Packagist主页，没有账号的话可以先注册一个账号，登录进去，然后点击右上角的Submit，然后填入我们创建的仓库的地址，点击Check，确认没问题后，再点击Submit。 这样，我们的项目就提交成功了，在packagist搜所chengfeng也能看到chengfeng/demo这个项目了。Congratulations！！！ 至此，我们的包已经发布到线上了，我们可以通过</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">composer require chengfeng/demo dev-master</span><br></pre></td></tr></table></figure>
+
+<p>来安装我们的依赖。（注意，我们之前设置了国内的源，这里可能会有一定的延时） 好像一切到此就完了，但是我们会发现一些问题，在提交完，有一个提示，说不能自动更新。解决这个问题也简单，我们在github添加一个packagist的service就好了，packagist的官网也给出了<a target="_blank" rel="noopener" href="https://packagist.org/about#how-to-update-packages">详细步骤</a> 按照说明一步一步就可以非常轻松的搞定了。 还有一个问题就是，我们在packagist看到chengfeng/demo只有一个dev-master的版本，这不符合我们的要求啊，别人的包都有一个一个的版本的。其实就是因为我们只有一个分支master，对应的composer包就是dev-master版本，composer包的版本是来自于git的分支和tag，分支代表dev版本(除master外)，tag代表stable版本。我们在提交一个版本的分支（如v1.0.0）这样就有了一个新的版本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git checkout -b v1.0.0</span><br><span class="line">git push origin v1.0.0</span><br></pre></td></tr></table></figure>
+
+<p>我们推送分之到远程后，刷新packagist网站上我们项目的地址就可以看到多了一个新的版本v1.0.0-dev。还是不够，我们并没有一个稳定版本，大部分线上的项目都是要求稳定版本的，我们的包则无法安装。我们通过git添加一个tag发布一个稳定版本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git tag 1.0.0</span><br><span class="line">git push --tag</span><br></pre></td></tr></table></figure>
+
+<p>再刷新页面就看到了。 <img src="https://blog-1252719385.cos.ap-guangzhou.myqcloud.com/images/20180208194939.png"> 现在，我们的包就正式开发完成了。 可以通过<code>composer require chengfeng/demo</code>安装了。 关于源代码，可以在<a target="_blank" rel="noopener" href="https://github.com/chengfengGit/demo">https://github.com/chengfengGit/demo</a>下载</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/PHP/" rel="tag"># PHP</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/2018/02/05/%E5%86%99%E5%9C%A8%E6%98%A5%E8%8A%82%E5%89%8D%E7%9A%84%E5%B0%8F%E7%BB%93/" rel="prev" title="写在春节前的胡扯">
+      <i class="fa fa-chevron-left"></i> 写在春节前的胡扯
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/2018/02/12/asyncio%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%BC%8F/" rel="next" title="asyncio学习笔记之生产者消费者模式">
+      asyncio学习笔记之生产者消费者模式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Chengfeng</p>
+  <div class="site-description" itemprop="description">生活的点点滴滴</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Chengfeng</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

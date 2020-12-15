@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zhuochengwo.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="综述最近写的项目是一个后台常驻进程的项目，没有引入框架，操作数据库这一块为了方便引入了 Eloquent 。 Laravel 是目前 PHP 语言最活跃、最优雅的框架，作为 Laravel 框架核心组件之一的 Eloquent ORM 使人印象深刻。得益于 Laravel 组件化的设计 (Laravel组件库 ) ，使得我们能在 Laravel 之外仍能非常方便的单独使用，这一点必须为 Larav">
+<meta property="og:type" content="article">
+<meta property="og:title" content="独立使用Eloquent之sql日志及重连机制">
+<meta property="og:url" content="https://zhuochengwo.github.io/blog/2018/09/24/%E7%8B%AC%E7%AB%8B%E4%BD%BF%E7%94%A8eloquent%E4%B9%8Bsql%E6%97%A5%E5%BF%97%E5%8F%8A%E9%87%8D%E8%BF%9E%E6%9C%BA%E5%88%B6/index.html">
+<meta property="og:site_name" content="程枫的个人博客">
+<meta property="og:description" content="综述最近写的项目是一个后台常驻进程的项目，没有引入框架，操作数据库这一块为了方便引入了 Eloquent 。 Laravel 是目前 PHP 语言最活跃、最优雅的框架，作为 Laravel 框架核心组件之一的 Eloquent ORM 使人印象深刻。得益于 Laravel 组件化的设计 (Laravel组件库 ) ，使得我们能在 Laravel 之外仍能非常方便的单独使用，这一点必须为 Larav">
+<meta property="og:locale">
+<meta property="og:image" content="https://blog-1252719385.cos.ap-guangzhou.myqcloud.com/images/20180923233957.png">
+<meta property="og:image" content="https://blog-1252719385.cos.ap-guangzhou.myqcloud.com/images/20180923233918.png">
+<meta property="og:image" content="https://blog-1252719385.cos.ap-guangzhou.myqcloud.com/images/20180924000024.png">
+<meta property="article:published_time" content="2018-09-23T16:40:45.000Z">
+<meta property="article:modified_time" content="2020-12-15T05:45:28.667Z">
+<meta property="article:author" content="Chengfeng">
+<meta property="article:tag" content="PHP">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="Eloquent">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog-1252719385.cos.ap-guangzhou.myqcloud.com/images/20180923233957.png">
+
+<link rel="canonical" href="https://zhuochengwo.github.io/blog/2018/09/24/%E7%8B%AC%E7%AB%8B%E4%BD%BF%E7%94%A8eloquent%E4%B9%8Bsql%E6%97%A5%E5%BF%97%E5%8F%8A%E9%87%8D%E8%BF%9E%E6%9C%BA%E5%88%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>独立使用Eloquent之sql日志及重连机制 | 程枫的个人博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">程枫的个人博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://zhuochengwo.github.io/blog/2018/09/24/%E7%8B%AC%E7%AB%8B%E4%BD%BF%E7%94%A8eloquent%E4%B9%8Bsql%E6%97%A5%E5%BF%97%E5%8F%8A%E9%87%8D%E8%BF%9E%E6%9C%BA%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="Chengfeng">
+      <meta itemprop="description" content="生活的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="程枫的个人博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          独立使用Eloquent之sql日志及重连机制
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-09-24 00:40:45" itemprop="dateCreated datePublished" datetime="2018-09-24T00:40:45+08:00">2018-09-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/%E6%95%B2%E4%BB%A3%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">敲代码</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><p>最近写的项目是一个后台常驻进程的项目，没有引入框架，操作数据库这一块为了方便引入了 <a target="_blank" rel="noopener" href="https://github.com/illuminate/database">Eloquent</a> 。 <strong>Laravel</strong> 是目前 <strong>PHP</strong> 语言最活跃、最优雅的框架，作为 <strong>Laravel</strong> 框架核心组件之一的 <strong>Eloquent ORM</strong> 使人印象深刻。得益于 <strong>Laravel</strong> 组件化的设计 (<a target="_blank" rel="noopener" href="https://github.com/illuminate">Laravel组件库</a> ) ，使得我们能在 <strong>Laravel</strong> 之外仍能非常方便的单独使用，这一点必须为 <strong>Laravel</strong> 设计者们点赞。 使用上也非常简单，直接通过 <strong>composer</strong> 安装即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">composer require illuminate/database</span><br></pre></td></tr></table></figure>
+
+<p>对于数据库及密码这一类隐私类的配置，我们也采用 <strong>.env</strong> 文件进行配置，并对其忽略，避免提交到版本库中。对于 <strong>.env</strong> 文件的读取，可以使用<a target="_blank" rel="noopener" href="https://github.com/vlucas/phpdotenv">phpdotenv</a>这个库，使用上只需通过</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//这里的ROOT_PATH是定义的项目根目录，也是.env文件所在目录</span></span><br><span class="line"><span class="variable">$dotenv</span> = <span class="keyword">new</span> Dotenv(ROOT_PATH);</span><br><span class="line"><span class="variable">$dotenv</span>-&gt;load();</span><br></pre></td></tr></table></figure>
+
+<p>加载即可，这样可以通过 <strong>php</strong> 系统函数 <strong>getenv</strong> 或者超全局变量 <strong>$_ENV</strong> 和  <strong>$_SERVER</strong> 中取到我们在 <strong>.env</strong> 中的配置了。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> <span class="title">Illuminate</span>\<span class="title">Database</span>\<span class="title">Capsule</span>\<span class="title">Manager</span> <span class="title">as</span> <span class="title">Capsule</span>;</span><br><span class="line"></span><br><span class="line"><span class="variable">$capsule</span> = <span class="keyword">new</span> Capsule;</span><br><span class="line"><span class="comment">//配置统一放置在了.env中</span></span><br><span class="line"><span class="variable">$capsule</span>-&gt;addConnection([</span><br><span class="line">    <span class="string">&#x27;driver&#x27;</span>    =&gt; <span class="string">&#x27;mysql&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;host&#x27;</span>      =&gt; getenv(<span class="string">&#x27;db_host&#x27;</span>),</span><br><span class="line">    <span class="string">&#x27;database&#x27;</span>  =&gt; getenv(<span class="string">&#x27;db_database&#x27;</span>),</span><br><span class="line">    <span class="string">&#x27;username&#x27;</span>  =&gt; getenv(<span class="string">&#x27;db_username&#x27;</span>),</span><br><span class="line">    <span class="string">&#x27;password&#x27;</span>  =&gt; getenv(<span class="string">&#x27;db_password&#x27;</span>),</span><br><span class="line">    <span class="string">&#x27;charset&#x27;</span>   =&gt; <span class="string">&#x27;utf8&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;collation&#x27;</span> =&gt; <span class="string">&#x27;utf8_unicode_ci&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;prefix&#x27;</span>    =&gt; <span class="string">&#x27;&#x27;</span>,</span><br><span class="line">]);</span><br><span class="line"><span class="comment">//设置全局，这样就能在项目中全局使用了</span></span><br><span class="line"><span class="variable">$capsule</span>-&gt;setAsGlobal();</span><br><span class="line"><span class="comment">//启动</span></span><br><span class="line"><span class="variable">$capsule</span>-&gt;bootEloquent();</span><br></pre></td></tr></table></figure>
+
+<p>几行代码就搞定了，接下来就像在<strong>Laravel</strong>中一样方便的操作数据库了。</p>
+<h3 id="1、sql日志"><a href="#1、sql日志" class="headerlink" title="1、sql日志"></a>1、sql日志</h3><p>开发中，免不了需要查看 <strong>sql</strong> 日志，<strong>Eloquent</strong> 组件提供了注册 <strong>dispatcher</strong> 的方法，这样我们就能通过捕获 <strong>Eloquent</strong> 的事件来打印日志了。这里主要参考了<a target="_blank" rel="noopener" href="http://xieye.iteye.com/blog/2387809">这篇博客</a>，此博主关于独立使用 <strong>Eloquent</strong> 有一系列的文章，值得一看。</p>
+<h4 id="1-1、创建dispatcher"><a href="#1-1、创建dispatcher" class="headerlink" title="1.1、创建dispatcher"></a>1.1、创建dispatcher</h4><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> <span class="title">app</span>\<span class="title">dispatcher</span>;</span><br><span class="line"><span class="keyword">use</span> \<span class="title">Illuminate</span>\<span class="title">Contracts</span>\<span class="title">Events</span>\<span class="title">Dispatcher</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SqlDispatcher</span> <span class="keyword">implements</span> <span class="title">Dispatcher</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">dispatch</span>(<span class="params"><span class="variable">$event</span>, <span class="variable">$payload</span> = [], <span class="variable">$halt</span> = <span class="literal">false</span></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">//读取QueryExecuted事件中的sql内容并打印</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="variable">$event</span> <span class="keyword">instanceof</span> \Illuminate\Database\Events\QueryExecuted) &#123;</span><br><span class="line">            <span class="variable">$sql</span> = <span class="variable">$event</span>-&gt;sql;</span><br><span class="line">            <span class="keyword">if</span> (<span class="variable">$event</span>-&gt;bindings) &#123;</span><br><span class="line">                <span class="keyword">foreach</span> (<span class="variable">$event</span>-&gt;bindings <span class="keyword">as</span> <span class="variable">$v</span>) &#123;</span><br><span class="line">                    <span class="variable">$sql</span> = preg_replace(<span class="string">&#x27;/\\?/&#x27;</span>, <span class="string">&quot;&#x27;&quot;</span> . addslashes(<span class="variable">$v</span>) . <span class="string">&quot;&#x27;&quot;</span>, <span class="variable">$sql</span>, <span class="number">1</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">echo</span> <span class="variable">$sql</span> . PHP_EOL;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">listen</span>(<span class="params"><span class="variable">$events</span>, <span class="variable">$listener</span></span>)</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">hasListeners</span>(<span class="params"><span class="variable">$eventName</span></span>)</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">subscribe</span>(<span class="params"><span class="variable">$subscriber</span></span>)</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">until</span>(<span class="params"><span class="variable">$event</span>, <span class="variable">$payload</span> = []</span>)</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">push</span>(<span class="params"><span class="variable">$event</span>, <span class="variable">$payload</span> = []</span>)</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">flush</span>(<span class="params"><span class="variable">$event</span></span>)</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">forget</span>(<span class="params"><span class="variable">$event</span></span>)</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">forgetPushed</span>(<span class="params"></span>)</span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-2、注册dispatcher"><a href="#1-2、注册dispatcher" class="headerlink" title="1.2、注册dispatcher"></a>1.2、注册dispatcher</h4><p>在之前 <strong>MySQL</strong>初始化 <strong>Eloquent</strong> 的地方添加一行代码即可</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$capsule</span>-&gt;setAsGlobal();</span><br><span class="line"><span class="variable">$capsule</span>-&gt;bootEloquent();</span><br><span class="line"><span class="comment">//注册刚创建的dispatcher</span></span><br><span class="line"><span class="variable">$capsule</span>-&gt;setEventDispatcher(<span class="keyword">new</span> SqlDispatcher());</span><br></pre></td></tr></table></figure>
+
+<p>因为暂时只需要 <strong>sql</strong> 日志，这个 <strong>dispatcher</strong> 写的非常简单，其实它可以将 <strong>Eloquent</strong> 事件按照添加的 <strong>listener</strong> 继续分发。</p>
+<h3 id="2、Eloquent重连机制"><a href="#2、Eloquent重连机制" class="headerlink" title="2、Eloquent重连机制"></a>2、Eloquent重连机制</h3><p>因为这是一个常驻进程的项目，那么就必须考虑 <strong>MySQL</strong>重连问题，一方面，<strong>MySQL</strong>有连接超时的问题（通过 <strong>wait_timeout</strong> 设置），另一方面要考虑 <strong>MySQL</strong> 重启的问题，这两者任意一个都可能导致 <strong>MySQL server has gone away</strong> 的问题。 解决  <strong>MySQL server has gone away</strong> 的问题有好几种解决方案，目前来说最佳方案就是在执行 <strong>mysql_query</strong> 时检查执行结果，如果发现断开则自动重连，并重新执行 <strong>sql</strong> ，<strong>Eloquent</strong> 就是使用的这种方案。 查看 <strong>Eloquent</strong> 底层源码，可以在<strong>vendor/illuminate/database/Connection.php</strong>中看到有 <strong>tryAgainIfCausedByLostConnection</strong> 方法来处理这个问题。 这里主要是验证下这个重试机制。</p>
+<h4 id="2-1、设置mysql超时时间"><a href="#2-1、设置mysql超时时间" class="headerlink" title="2.1、设置mysql超时时间"></a>2.1、设置mysql超时时间</h4><h4 id="2-2、测试mysql超时情况下的重试问题"><a href="#2-2、测试mysql超时情况下的重试问题" class="headerlink" title="2.2、测试mysql超时情况下的重试问题"></a>2.2、测试mysql超时情况下的重试问题</h4><p>将 <strong>MySQL</strong> 的超时时间设置成 <strong>30s</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> <span class="keyword">global</span> wait_timeout=<span class="number">30</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    <span class="variable">$user</span> = User::find(<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">echo</span> date(<span class="string">&#x27;Y-m-d H:i:s&#x27;</span>) . PHP_EOL;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;UserId:&quot;</span> . <span class="variable">$user</span>-&gt;id . PHP_EOL;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;\n------------------------------------------\n&quot;</span>;</span><br><span class="line">    sleep(<span class="number">40</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://blog-1252719385.cos.ap-guangzhou.myqcloud.com/images/20180923233957.png"> 通过执行代码输出的内容可以清晰看到的看到一个 <strong>php warning</strong> ，出现了<strong>MySQL server has gone away</strong>的问题，而 <strong>Eloquent</strong> 捕获了这个错误，自动重连了并重新执行了查询语句获取了结果。其中打印出来的 <strong>sql</strong> 就是之前添加的 <strong>SqlDispatcher</strong> 输出的。 通过 <strong>MySQL</strong>的 <strong>show processlist</strong> 查看连接情况，也可以看到重连结果。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> <span class="keyword">processlist</span>;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://blog-1252719385.cos.ap-guangzhou.myqcloud.com/images/20180923233918.png"> 可以发现在超过 <strong>30s</strong> 的时候 <strong>MySQL</strong>关闭了连接，而后 <strong>Eloquent</strong> 自动重连了，新的连接重新开始计时。</p>
+<h4 id="2-3、测试mysql重启情况下的重试问题"><a href="#2-3、测试mysql重启情况下的重试问题" class="headerlink" title="2.3、测试mysql重启情况下的重试问题"></a>2.3、测试mysql重启情况下的重试问题</h4><p>从前一个例子可以得知，<strong>MySQL</strong>重新的情况下应该也是可以自动重连的，两种情况并没有本质区别。抱着严谨的态度，还是来测试下重启 <strong>MySQL</strong>的情况下。 简单的将之前的测试脚本中 <strong>sleep</strong> 时间改成 <strong>10</strong> ，然后通过重启 <strong>MySQL</strong> 进行测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo service mysql restart</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://blog-1252719385.cos.ap-guangzhou.myqcloud.com/images/20180924000024.png"> 查看结果后发现确实是同样的结果，证明 <strong>Eloquent</strong> 的重试机制还是可靠的。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>脱离<strong>Laravel</strong>独立使用 <strong>Eloquent</strong> 还是非常方便的，几乎没有成本。其自带的重试机制对于常驻进程的应用也多了一层可靠性保护。目前来说有点问题的是 <strong>Eloquent</strong> 的实现对如 <strong>PhpStorm</strong> 等IDE不够友好，代码提示缺失，文档上只能依赖于 <strong>Laravel</strong> 的文档，使用中并不是特别顺手。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/PHP/" rel="tag"># PHP</a>
+              <a href="/blog/tags/MySQL/" rel="tag"># MySQL</a>
+              <a href="/blog/tags/Eloquent/" rel="tag"># Eloquent</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/2018/09/23/mysql%E5%BC%80%E5%90%AF%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5%E4%BB%8D%E6%97%A0%E6%B3%95%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5/" rel="prev" title="Mysql开启远程连接仍无法远程连接">
+      <i class="fa fa-chevron-left"></i> Mysql开启远程连接仍无法远程连接
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/2018/10/09/git%E4%BF%9D%E7%95%99%E7%A9%BA%E7%9B%AE%E5%BD%95/" rel="next" title="Git保留空目录">
+      Git保留空目录 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%BC%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">综述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81sql%E6%97%A5%E5%BF%97"><span class="nav-number">1.1.</span> <span class="nav-text">1、sql日志</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1%E3%80%81%E5%88%9B%E5%BB%BAdispatcher"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.1、创建dispatcher</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2%E3%80%81%E6%B3%A8%E5%86%8Cdispatcher"><span class="nav-number">1.1.2.</span> <span class="nav-text">1.2、注册dispatcher</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81Eloquent%E9%87%8D%E8%BF%9E%E6%9C%BA%E5%88%B6"><span class="nav-number">1.2.</span> <span class="nav-text">2、Eloquent重连机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1%E3%80%81%E8%AE%BE%E7%BD%AEmysql%E8%B6%85%E6%97%B6%E6%97%B6%E9%97%B4"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1、设置mysql超时时间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2%E3%80%81%E6%B5%8B%E8%AF%95mysql%E8%B6%85%E6%97%B6%E6%83%85%E5%86%B5%E4%B8%8B%E7%9A%84%E9%87%8D%E8%AF%95%E9%97%AE%E9%A2%98"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2、测试mysql超时情况下的重试问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3%E3%80%81%E6%B5%8B%E8%AF%95mysql%E9%87%8D%E5%90%AF%E6%83%85%E5%86%B5%E4%B8%8B%E7%9A%84%E9%87%8D%E8%AF%95%E9%97%AE%E9%A2%98"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.3、测试mysql重启情况下的重试问题</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number"></span> <span class="nav-text">总结</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Chengfeng</p>
+  <div class="site-description" itemprop="description">生活的点点滴滴</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Chengfeng</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

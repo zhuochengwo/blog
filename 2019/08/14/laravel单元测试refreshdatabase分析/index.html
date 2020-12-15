@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zhuochengwo.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在编写单元测试时，我们或多或少会使用到数据库，一方面我们需要一个干净的数据库，另一方面我们也需要能方便的回滚&#x2F;清理掉测试产生的数据。 使用在laravel单元测试中，我们可以创建.env.testing，配置测试需要的环境参数。如单独配置一个测试库，在执行phpunit时，laravel会自动切换到这个配置，如果没有则会使用.env的配置。 laravel有提供用于清理数据库中数据的trait，在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="laravel单元测试RefreshDatabase分析">
+<meta property="og:url" content="https://zhuochengwo.github.io/blog/2019/08/14/laravel%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95refreshdatabase%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="程枫的个人博客">
+<meta property="og:description" content="在编写单元测试时，我们或多或少会使用到数据库，一方面我们需要一个干净的数据库，另一方面我们也需要能方便的回滚&#x2F;清理掉测试产生的数据。 使用在laravel单元测试中，我们可以创建.env.testing，配置测试需要的环境参数。如单独配置一个测试库，在执行phpunit时，laravel会自动切换到这个配置，如果没有则会使用.env的配置。 laravel有提供用于清理数据库中数据的trait，在">
+<meta property="og:locale">
+<meta property="article:published_time" content="2019-08-14T14:12:33.000Z">
+<meta property="article:modified_time" content="2020-12-15T05:45:28.643Z">
+<meta property="article:author" content="Chengfeng">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://zhuochengwo.github.io/blog/2019/08/14/laravel%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95refreshdatabase%E5%88%86%E6%9E%90/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>laravel单元测试RefreshDatabase分析 | 程枫的个人博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">程枫的个人博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://zhuochengwo.github.io/blog/2019/08/14/laravel%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95refreshdatabase%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="Chengfeng">
+      <meta itemprop="description" content="生活的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="程枫的个人博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          laravel单元测试RefreshDatabase分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-08-14 22:12:33" itemprop="dateCreated datePublished" datetime="2019-08-14T22:12:33+08:00">2019-08-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/%E6%95%B2%E4%BB%A3%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">敲代码</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在编写单元测试时，我们或多或少会使用到数据库，一方面我们需要一个干净的数据库，另一方面我们也需要能方便的回滚/清理掉测试产生的数据。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>在<code>laravel</code>单元测试中，我们可以创建<code>.env.testing</code>，配置测试需要的环境参数。如单独配置一个测试库，在执行<code>phpunit</code>时，<code>laravel</code>会自动切换到这个配置，如果没有则会使用<code>.env</code>的配置。 <code>laravel</code>有提供用于清理数据库中数据的<code>trait</code>，在单元测试的<code>class</code>中就能直接使用</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> <span class="title">RefreshDatabase</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>  <a target="_blank" rel="noopener" href="https://laravel.com/api/5.8/Illuminate/Foundation/Testing/DatabaseMigrations.html">DatabaseMigration</a></li>
+<li>  <a target="_blank" rel="noopener" href="https://laravel.com/api/5.8/Illuminate/Foundation/Testing/DatabaseTransactions.html">DatabaseTransactions</a></li>
+<li>  <a target="_blank" rel="noopener" href="https://laravel.com/api/5.8/Illuminate/Foundation/Testing/RefreshDatabase.html">RefreshDatabase</a></li>
+</ul>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>这几个<code>trait</code>各有优缺点，需要看自己的需要选择。 <code>DatabaseMigration</code>比较简单粗暴，在每个单元测试开始时<code>migrate:fresh</code>创建库表结构，结束时直接使用<code>migrate:rollback</code>回滚了整个测试库，优点是真的干净，缺点就是慢。 <code>DatabaseTransactions</code> 跟 <code>RefreshDatabase</code> 差别不大，都是采用事务回滚的方式，只是<code>RefreshDatabase</code>能提供内存型数据库的支持，本文也主要是分析<code>RefreshDatabase</code>的执行过程。</p>
+<h4 id="为什么在test类use相关Trait就能发生作用呢？"><a href="#为什么在test类use相关Trait就能发生作用呢？" class="headerlink" title="为什么在test类use相关Trait就能发生作用呢？"></a>为什么在<code>tes</code>t类<code>use</code>相关<code>Trait</code>就能发生作用呢？</h4><p>追踪<code>TestCase</code>源码，发现在基类<a target="_blank" rel="noopener" href="https://laravel.com/api/5.8/Illuminate/Foundation/Testing/TestCase.html">TestCase</a>中<code>setUpTraits</code>方法会检查框架预定义好的一系列<code>Trait</code>,其中就有我们需要的<code>RefreshDatabase</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">setUpTraits</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable">$uses</span> = array_flip(class_uses_recursive(<span class="built_in">static</span>::class));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$uses</span>[RefreshDatabase::class])) &#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;refreshDatabase();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$uses</span>[DatabaseMigrations::class])) &#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;runDatabaseMigrations();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ....</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>此段代码在检测到<code>RefreshDatabase</code>后会调用其<code>refreshDatabase</code>方法，在此方法中会调用自己的相关方法，检查<code>migrate</code>是否执行，否则会执行<code>migrate:fresh</code>。然后会调用<code>beforeApplicationDestroyed</code>方法注册一系列回调方法，当中就有最重要的<code>rollback</code>。</p>
+<h4 id="RefreshDatabase具体执行了哪些sql呢？"><a href="#RefreshDatabase具体执行了哪些sql呢？" class="headerlink" title="RefreshDatabase具体执行了哪些sql呢？"></a><code>RefreshDatabase</code>具体执行了哪些<code>sql</code>呢？</h4><p>通过<code>laravel</code>通过的事件我们是不能获取到如<code>START TRANSACTION</code>等相关语句是不会出现的。 我们开启<code>MySQL</code>的<code>sql</code>日志</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SET GLOBAL general_log &#x3D; &#39;ON&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>执行<code>phpunit</code>，通过日志可以看到会先执行<code>migrate</code>相关内容，就然后就通过<code>START TRANSACTION</code>开启一个事务，在测试结束后<code>ROLLBACK</code>。 如果执行的需要测试的代码有使用事务，则会通过<code>SAVEPOINT</code> 给子事务标记，如果需要回滚则只会滚到标记点即可。对于其中事务的提交，则因<code>laravel</code>事务处理机制问题，并不会提交，只是标记。 与<code>aa</code>的区别就是，不会在每一个测试开始是都会执行<code>migrate</code>，原因是在第一次执行后，其通过<code>RefreshDatabaseState::$migrated</code>标记已执行<code>migrate</code>，后续的<code>test</code>虽然会执行其<code>refreshDatabase</code>方法，但由于能检测到已经执行就不会再次执行了。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">refreshTestDatabase</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">//先检查，没有执行migrate则会执行</span></span><br><span class="line">        <span class="keyword">if</span> (! RefreshDatabaseState::<span class="variable">$migrated</span>) &#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;artisan(<span class="string">&#x27;migrate:fresh&#x27;</span>, [</span><br><span class="line">                <span class="string">&#x27;--drop-views&#x27;</span> =&gt; <span class="keyword">$this</span>-&gt;shouldDropViews(),</span><br><span class="line">                <span class="string">&#x27;--drop-types&#x27;</span> =&gt; <span class="keyword">$this</span>-&gt;shouldDropTypes(),</span><br><span class="line">            ]);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">$this</span>-&gt;app[Kernel::class]-&gt;setArtisan(<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">            RefreshDatabaseState::<span class="variable">$migrated</span> = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">$this</span>-&gt;beginDatabaseTransaction();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>而后则只会开启事务</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Begin a database transaction on the testing database.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> void</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">beginDatabaseTransaction</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="variable">$database</span> = <span class="keyword">$this</span>-&gt;app-&gt;make(<span class="string">&#x27;db&#x27;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;connectionsToTransact() <span class="keyword">as</span> <span class="variable">$name</span>) &#123;</span><br><span class="line">        <span class="variable">$connection</span> = <span class="variable">$database</span>-&gt;connection(<span class="variable">$name</span>);</span><br><span class="line">        <span class="variable">$dispatcher</span> = <span class="variable">$connection</span>-&gt;getEventDispatcher();</span><br><span class="line"></span><br><span class="line">        <span class="variable">$connection</span>-&gt;unsetEventDispatcher();</span><br><span class="line">        <span class="variable">$connection</span>-&gt;beginTransaction();</span><br><span class="line">        <span class="variable">$connection</span>-&gt;setEventDispatcher(<span class="variable">$dispatcher</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">$this</span>-&gt;beforeApplicationDestroyed(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) <span class="title">use</span> (<span class="params"><span class="variable">$database</span></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;connectionsToTransact() <span class="keyword">as</span> <span class="variable">$name</span>) &#123;</span><br><span class="line">            <span class="variable">$connection</span> = <span class="variable">$database</span>-&gt;connection(<span class="variable">$name</span>);</span><br><span class="line">            <span class="variable">$dispatcher</span> = <span class="variable">$connection</span>-&gt;getEventDispatcher();</span><br><span class="line"></span><br><span class="line">            <span class="variable">$connection</span>-&gt;unsetEventDispatcher();</span><br><span class="line">            <span class="variable">$connection</span>-&gt;rollback();</span><br><span class="line">            <span class="variable">$connection</span>-&gt;setEventDispatcher(<span class="variable">$dispatcher</span>);</span><br><span class="line">            <span class="variable">$connection</span>-&gt;disconnect();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>至此，<code>RefreshDatabase</code>的执行流程大致清晰了。</p>
+<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><p>需要注意的是，因为使用的是事务的方式，如果需要测试的代码中使用了事务，而忘了使用<code>COMMIT</code> ，则是不能在单元测试中发现，因为<code>laravel</code>并不会单独对子事务提交。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/2019/06/26/laradock-workspace%E5%90%AF%E7%94%A8xdebug%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E8%A6%86%E7%9B%96%E7%8E%87%E5%88%86%E6%9E%90/" rel="prev" title="laradock workspace启用xdebug单元测试覆盖率分析">
+      <i class="fa fa-chevron-left"></i> laradock workspace启用xdebug单元测试覆盖率分析
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%9C%A8test%E7%B1%BBuse%E7%9B%B8%E5%85%B3Trait%E5%B0%B1%E8%83%BD%E5%8F%91%E7%94%9F%E4%BD%9C%E7%94%A8%E5%91%A2%EF%BC%9F"><span class="nav-number">2.0.1.</span> <span class="nav-text">为什么在test类use相关Trait就能发生作用呢？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RefreshDatabase%E5%85%B7%E4%BD%93%E6%89%A7%E8%A1%8C%E4%BA%86%E5%93%AA%E4%BA%9Bsql%E5%91%A2%EF%BC%9F"><span class="nav-number">2.0.2.</span> <span class="nav-text">RefreshDatabase具体执行了哪些sql呢？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-number">2.1.</span> <span class="nav-text">注意</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Chengfeng</p>
+  <div class="site-description" itemprop="description">生活的点点滴滴</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Chengfeng</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

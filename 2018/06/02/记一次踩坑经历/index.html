@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zhuochengwo.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="是这样的，我在写完博客发布却发现博客变成了定时发布，搜了下是说wordpress时区设置问题，在后台看了下wordpress时区设置是没有问题的，把php的时区设置成了Asia&#x2F;shanghai也是没有问题，直接使用php date函数输出当前时间也是对的。懵逼了哈！找了大半天，google翻了好几页，还是没解决。 但这时我发现了一个细节，在wordpress后台设置那里，UTC时间显示的是本地时">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次踩坑经历">
+<meta property="og:url" content="https://zhuochengwo.github.io/blog/2018/06/02/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%B8%A9%E5%9D%91%E7%BB%8F%E5%8E%86/index.html">
+<meta property="og:site_name" content="程枫的个人博客">
+<meta property="og:description" content="是这样的，我在写完博客发布却发现博客变成了定时发布，搜了下是说wordpress时区设置问题，在后台看了下wordpress时区设置是没有问题的，把php的时区设置成了Asia&#x2F;shanghai也是没有问题，直接使用php date函数输出当前时间也是对的。懵逼了哈！找了大半天，google翻了好几页，还是没解决。 但这时我发现了一个细节，在wordpress后台设置那里，UTC时间显示的是本地时">
+<meta property="og:locale">
+<meta property="article:published_time" content="2018-06-02T06:46:28.000Z">
+<meta property="article:modified_time" content="2020-12-15T05:45:28.667Z">
+<meta property="article:author" content="Chengfeng">
+<meta property="article:tag" content="踩坑">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://zhuochengwo.github.io/blog/2018/06/02/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%B8%A9%E5%9D%91%E7%BB%8F%E5%8E%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>记一次踩坑经历 | 程枫的个人博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">程枫的个人博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://zhuochengwo.github.io/blog/2018/06/02/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%B8%A9%E5%9D%91%E7%BB%8F%E5%8E%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="Chengfeng">
+      <meta itemprop="description" content="生活的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="程枫的个人博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          记一次踩坑经历
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-06-02 14:46:28" itemprop="dateCreated datePublished" datetime="2018-06-02T14:46:28+08:00">2018-06-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/%E8%9B%87%E7%B2%BE%E7%97%85/" itemprop="url" rel="index"><span itemprop="name">蛇精病</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>是这样的，我在写完博客发布却发现博客变成了定时发布，搜了下是说wordpress时区设置问题，在后台看了下wordpress时区设置是没有问题的，把php的时区设置成了Asia/shanghai也是没有问题，直接使用php date函数输出当前时间也是对的。懵逼了哈！找了大半天，google翻了好几页，还是没解决。 但这时我发现了一个细节，在wordpress后台设置那里，UTC时间显示的是本地时间，而本地时间显示的则是在实际本地时间的基础上+8小时，这什么鬼啊？没办法，只能上手看wordpress源码调试了。 在本地直接调试发现wp-include/functions.php里边date_i18n函数输出的是没有问题的，到了服务器上这里输出的却不对了。在wp-seting.php文件中，发现date_default_timezone_set( ‘UTC’ )，wordpress默认使用UTC时区，调试发现设置UTC但是date()函数输出的还是北京时间，这就奇怪了。 写个测试代码继续试：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    var_dump(date_default_timezone_get());</span><br><span class="line">    var_dump(date(<span class="string">&#x27;Y-m-d H:i:s&#x27;</span>));</span><br><span class="line">    <span class="variable">$res</span> = date_default_timezone_set( <span class="string">&#x27;UTC&#x27;</span> );</span><br><span class="line">    var_dump(<span class="variable">$res</span>);</span><br><span class="line">    var_dump(date_default_timezone_get());</span><br><span class="line">    var_dump(date(<span class="string">&#x27;Y-m-d H:i:s&#x27;</span>));</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>却得到了这样的结果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">php test.php      </span><br><span class="line">string(14) <span class="string">&quot;Asia/Chongqing&quot;</span></span><br><span class="line">string(19) <span class="string">&quot;2018-06-02 00:33:05&quot;</span></span><br><span class="line">bool(<span class="literal">true</span>)</span><br><span class="line">string(3) <span class="string">&quot;UTC&quot;</span></span><br><span class="line">string(19) <span class="string">&quot;2018-06-02 00:33:05&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>很神奇啊有木马，继续搜啊搜，还是啥结果没有，彻底懵了。<code>date_default_timezone_set( &#39;UTC&#39; )</code>;还能不生效？ 搞到晚上1点多还是没想明白，系统时区，php时区各种尝试了个遍，反正就是没效果，没解，只能等明天找人问问试试。 睡了一觉起来，继续去看这个问题，还是没什么头绪，把问题丢到swoole群里，不出意外的没人鸟你。问题不能不解决啊，只能继续摸索，甚至怀疑发现了php的bug，但是本地的版本跟服务器是一样的，却没有这个问题，那只能是系统的问题。 继续在ubuntu上找问题，这时发现了一个奇怪的现象，我设置系统UTC时区的时候，date输出的还是本地时间，而且跟我设置成“Asia/shanghai”时输出的是一样内容，跟wordpress上UTC打印出来的确是本地时间一个现象了，至此可以肯定是系统哪里设置有问题。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">timedatectl</span><br><span class="line">                      Local time: Sat 2018-06-02 14:31:11 CST</span><br><span class="line">                  Universal time: Sat 2018-06-02 06:31:11 UTC</span><br><span class="line">                        RTC time: Sat 2018-06-02 06:31:12</span><br><span class="line">                       Time zone: UTC (CST, +0800)</span><br><span class="line">       System clock synchronized: yes</span><br><span class="line">systemd-timesyncd.service active: yes</span><br><span class="line">                 RTC <span class="keyword">in</span> <span class="built_in">local</span> TZ: no&lt;</span><br></pre></td></tr></table></figure>
+
+<p>使用timedatectl发现Time zone： UTC （CST，+0800）这是什么鬼？这不符合常理啊，UTC不应该是+0吗，这个时候我想起来之前设置系统时区的时候看别人博客有个复制操作，当时没怎么注意，使用history找到了那行命令:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo cp /etc/timezone /usr/share/zoneinfo/UTC</span><br></pre></td></tr></table></figure>
+
+<p>发现问题有木有，我在将时区设置成Asia/Shanghai后把timezone内容拷贝覆盖了UTC时区的内容，这样就导致我设置UTC时区输出的都是Asia/Shanghai的，坑了，这就是看别人博客复制命令不看就执行的下场，浪费了这么多时间。 那只要恢复UTC文件的内容即可。但由于我耗费了不少时间，脑子不灵光了，准备先删除/usr/share/zoneinfo/UTC再拷贝一个进去的时候，手抖了还是怎么着了，我也不知道，我只知道我按下回车键后看到的是：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo rm -rf /etc</span><br></pre></td></tr></table></figure>
+
+<p>仅次于<code>rm -rf /</code>的神一样的命令，当场又懵了。 好在数据库的内容没有丢，靠着这个ssh连接把数据库给备份出来了。 一切又重新开始了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/%E8%B8%A9%E5%9D%91/" rel="tag"># 踩坑</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/2018/06/01/ubuntu%E6%97%A5%E5%BF%97%E5%88%86%E5%89%B2logrotate/" rel="prev" title="Ubuntu日志分割logrotate">
+      <i class="fa fa-chevron-left"></i> Ubuntu日志分割logrotate
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/2018/06/02/%E8%A7%A3%E5%86%B3git-clone-the-remote-end-hung-up-unexpectedly-fatal-early-eof%E7%9A%84%E9%97%AE%E9%A2%98/" rel="next" title="解决Git clone时The remote end hung up unexpectedly fatal: early EOF的问题">
+      解决Git clone时The remote end hung up unexpectedly fatal: early EOF的问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Chengfeng</p>
+  <div class="site-description" itemprop="description">生活的点点滴滴</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Chengfeng</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zhuochengwo.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="错误1：&#96;foreach&#96;循环后留下悬挂指针在foreach循环中，如果我们需要更改迭代的元素或是为了提高效率，运用引用是一个好办法： 12345$arr &#x3D; array(1, 2, 3, 4);foreach ($arr as &amp;$value) &amp;#123;    $value &#x3D; $value * 2;&amp;#125;&#x2F;&#x2F; $arr is now array(2, 4, 6, 8)  这里">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP容易出错的细节">
+<meta property="og:url" content="https://zhuochengwo.github.io/blog/2018/02/05/PHP%E5%AE%B9%E6%98%93%E5%87%BA%E9%94%99%E7%9A%84%E7%BB%86%E8%8A%82/index.html">
+<meta property="og:site_name" content="程枫的个人博客">
+<meta property="og:description" content="错误1：&#96;foreach&#96;循环后留下悬挂指针在foreach循环中，如果我们需要更改迭代的元素或是为了提高效率，运用引用是一个好办法： 12345$arr &#x3D; array(1, 2, 3, 4);foreach ($arr as &amp;$value) &amp;#123;    $value &#x3D; $value * 2;&amp;#125;&#x2F;&#x2F; $arr is now array(2, 4, 6, 8)  这里">
+<meta property="og:locale">
+<meta property="article:published_time" content="2018-02-05T05:36:16.000Z">
+<meta property="article:modified_time" content="2020-12-15T05:45:28.639Z">
+<meta property="article:author" content="Chengfeng">
+<meta property="article:tag" content="PHP">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://zhuochengwo.github.io/blog/2018/02/05/PHP%E5%AE%B9%E6%98%93%E5%87%BA%E9%94%99%E7%9A%84%E7%BB%86%E8%8A%82/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>PHP容易出错的细节 | 程枫的个人博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">程枫的个人博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://zhuochengwo.github.io/blog/2018/02/05/PHP%E5%AE%B9%E6%98%93%E5%87%BA%E9%94%99%E7%9A%84%E7%BB%86%E8%8A%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="Chengfeng">
+      <meta itemprop="description" content="生活的点点滴滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="程枫的个人博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PHP容易出错的细节
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-02-05 13:36:16" itemprop="dateCreated datePublished" datetime="2018-02-05T13:36:16+08:00">2018-02-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-12-15 13:45:28" itemprop="dateModified" datetime="2020-12-15T13:45:28+08:00">2020-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/%E6%95%B2%E4%BB%A3%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">敲代码</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="错误1：-foreach-循环后留下悬挂指针"><a href="#错误1：-foreach-循环后留下悬挂指针" class="headerlink" title="错误1：`foreach`循环后留下悬挂指针"></a><strong>错误1：`foreach`循环后留下悬挂指针</strong></h3><p>在<code>foreach</code>循环中，如果我们需要更改迭代的元素或是为了提高效率，运用引用是一个好办法：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$arr</span> = <span class="keyword">array</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>);</span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$arr</span> <span class="keyword">as</span> &amp;<span class="variable">$value</span>) &#123;</span><br><span class="line">    <span class="variable">$value</span> = <span class="variable">$value</span> * <span class="number">2</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// $arr is now array(2, 4, 6, 8)</span></span><br></pre></td></tr></table></figure>
+
+<p>这里有个问题很多人会迷糊。循环结束后，<code>$value</code>并未销毁，<code>$value</code>其实是数组中最后一个元素的引用，这样在后续对<code>$value</code>的使用中，如果不知道这一点，会引发一些莫名奇妙的错误:)看看下面这段代码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$array</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];</span><br><span class="line"><span class="keyword">echo</span> implode(<span class="string">&#x27;,&#x27;</span>, <span class="variable">$array</span>), <span class="string">&quot;\n&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$array</span> <span class="keyword">as</span> &amp;<span class="variable">$value</span>) &#123;&#125; <span class="comment">// by reference</span></span><br><span class="line"><span class="keyword">echo</span> implode(<span class="string">&#x27;,&#x27;</span>, <span class="variable">$array</span>), <span class="string">&quot;\n&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$array</span> <span class="keyword">as</span> <span class="variable">$value</span>) &#123;&#125; <span class="comment">// by value (i.e., copy)</span></span><br><span class="line"><span class="keyword">echo</span> implode(<span class="string">&#x27;,&#x27;</span>, <span class="variable">$array</span>), <span class="string">&quot;\n&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>上面代码的运行结果如下：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span></span><br><span class="line"><span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span></span><br><span class="line"><span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<p>你猜对了吗？为什么是这个结果呢？ 我们来分析下。第一个循环过后，<code>$value</code>是数组中最后一个元素的引用。第二个循环开始： 第一步：复制$arr[0]到<code>$value</code>（注意此时<code>$value</code>是<code>$arr[2]</code>的引用），这时数组变成<code>[1,2,1]</code> 第二步：复制$arr[1]到<code>$value</code>，这时数组变成<code>[1,2,2]</code> 第三步：复制$arr[2]到<code>$value</code>，这时数组变成<code>[1,2,2]</code> 综上，最终结果就是<code>1,2,2</code> 避免这种错误最好的办法就是在循环后立即用<code>unset</code>函数销毁变量：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$arr</span> = <span class="keyword">array</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>);</span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$arr</span> <span class="keyword">as</span> &amp;<span class="variable">$value</span>) &#123;</span><br><span class="line">    <span class="variable">$value</span> = <span class="variable">$value</span> * <span class="number">2</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">unset</span>(<span class="variable">$value</span>); <span class="comment">// $value no longer references $arr[3]</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="错误2：对isset-函数行为的错误理解"><a href="#错误2：对isset-函数行为的错误理解" class="headerlink" title="错误2：对isset()函数行为的错误理解"></a><strong>错误2：对isset()函数行为的错误理解</strong></h2><p>对于<code>isset()</code>函数，变量不存在时会返回<code>false</code>，变量值为<code>null</code>时也会返回<code>false</code>。这种行为很容易把人弄迷糊。。。看下面的代码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$data</span> = fetchRecordFromStorage(<span class="variable">$storage</span>, <span class="variable">$identifier</span>);</span><br><span class="line"><span class="keyword">if</span> (!<span class="keyword">isset</span>(<span class="variable">$data</span>[<span class="string">&#x27;keyShouldBeSet&#x27;</span>]) &#123;</span><br><span class="line">    <span class="comment">// do something here if &#x27;keyShouldBeSet&#x27; is not set</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>写这段代码的人本意可能是如果<code>$data[&#39;keyShouldBeSet&#39;]</code>未设置，则执行对应逻辑。但问题在于即使<code>$data[&#39;keyShouldBeSet&#39;]</code>已设置，但设置的值为<code>null</code>，还是会执行对应的逻辑，这就不符合代码的本意了。 下面是另外一个例子：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="variable">$_POST</span>[<span class="string">&#x27;active&#x27;</span>]) &#123;</span><br><span class="line">    <span class="variable">$postData</span> = extractSomething(<span class="variable">$_POST</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (!<span class="keyword">isset</span>(<span class="variable">$postData</span>)) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&#x27;post not active&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上 面的代码假设<code>$_POST[&#39;active&#39;]</code>为真，那么<code>$postData</code>应该被设置，因此<code>isset($postData)</code>会返回<code>true</code>。反之，上 面代码假设<code>isset($postData)</code>返回false的唯一途径就是<code>$_POST[&#39;active&#39;]</code>也返回false。 真是这样吗？当然不是！ 即使<code>$_POST[&#39;active&#39;]</code>返回<code>true</code>，<code>$postData</code>也有可能被设置为<code>null</code>，这时<code>isset($postData)</code>就会返回<code>false</code>。这就不符合代码的本意了。 如果上面代码的本意仅是检测<code>$_POST[&#39;active&#39;]</code>是否为真，下面这样实现会更好：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="variable">$_POST</span>[<span class="string">&#x27;active&#x27;</span>]) &#123;</span><br><span class="line">    <span class="variable">$postData</span> = extractSomething(<span class="variable">$_POST</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$_POST</span>[<span class="string">&#x27;active&#x27;</span>]) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&#x27;post not active&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>判断一个变量是否真正被设置（区分未设置和设置值为null），<code>array_key_exists()</code>函数或许更好。重构上面的第一个例子，如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$data</span> = fetchRecordFromStorage(<span class="variable">$storage</span>, <span class="variable">$identifier</span>);</span><br><span class="line"><span class="keyword">if</span> (! array_key_exists(<span class="string">&#x27;keyShouldBeSet&#x27;</span>, <span class="variable">$data</span>)) &#123;</span><br><span class="line">    <span class="comment">// do this if &#x27;keyShouldBeSet&#x27; isn&#x27;t set</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外，结合<code>get_defined_vars()</code>函数，我们可以更加可靠的检测变量在当前作用域内是否被设置：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (array_key_exists(<span class="string">&#x27;varShouldBeSet&#x27;</span>, get_defined_vars())) &#123;</span><br><span class="line">    <span class="comment">// variable $varShouldBeSet exists in current scope</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="错误3：混淆返回值和返回引用"><a href="#错误3：混淆返回值和返回引用" class="headerlink" title="错误3：混淆返回值和返回引用"></a><strong>错误3：混淆返回值和返回引用</strong></h2><p>考虑下面的代码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Config</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$values</span> = [];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getValues</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;values;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$config</span> = <span class="keyword">new</span> Config();</span><br><span class="line"></span><br><span class="line"><span class="variable">$config</span>-&gt;getValues()[<span class="string">&#x27;test&#x27;</span>] = <span class="string">&#x27;test&#x27;</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$config</span>-&gt;getValues()[<span class="string">&#x27;test&#x27;</span>];</span><br></pre></td></tr></table></figure>
+
+<p>运行上面的代码，将会输出下面的内容：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PHP Notice: Undefined <span class="built_in">index</span>: test in /path/<span class="keyword">to</span>/my/script.php <span class="keyword">on</span> <span class="built_in">line</span> <span class="number">21</span></span><br></pre></td></tr></table></figure>
+
+<p>问题出在哪呢？问题就在于上面的代码混淆了返回值和返回引用。在PHP中，除非你显示的指定返回引用，否则对于数组PHP是值返回，也就是数组的拷贝。因此上面代码对返回数组赋值，实际是对拷贝数组进行赋值，非原数组赋值。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// getValues() returns a COPY of the $values array, so this adds a &#x27;test&#x27; element</span></span><br><span class="line"><span class="comment">// to a COPY of the $values array, but not to the $values array itself.</span></span><br><span class="line"><span class="variable">$config</span>-&gt;getValues()[<span class="string">&#x27;test&#x27;</span>] = <span class="string">&#x27;test&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// getValues() again returns ANOTHER COPY of the $values array, and THIS copy doesn&#x27;t</span></span><br><span class="line"><span class="comment">// contain a &#x27;test&#x27; element (which is why we get the &quot;undefined index&quot; message).</span></span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$config</span>-&gt;getValues()[<span class="string">&#x27;test&#x27;</span>];</span><br></pre></td></tr></table></figure>
+
+<p>下面是一种可能的解决办法，输出拷贝的数组，而不是原数组：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$vals</span> = <span class="variable">$config</span>-&gt;getValues();</span><br><span class="line"><span class="variable">$vals</span>[<span class="string">&#x27;test&#x27;</span>] = <span class="string">&#x27;test&#x27;</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$vals</span>[<span class="string">&#x27;test&#x27;</span>];</span><br></pre></td></tr></table></figure>
+
+<p>如果你就是想要改变原数组，也就是要反回数组引用，那应该如何处理呢？办法就是显示指定返回引用即可：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Config</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$values</span> = [];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// return a REFERENCE to the actual $values array</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> &amp;<span class="title">getValues</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;values;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$config</span> = <span class="keyword">new</span> Config();</span><br><span class="line"></span><br><span class="line"><span class="variable">$config</span>-&gt;getValues()[<span class="string">&#x27;test&#x27;</span>] = <span class="string">&#x27;test&#x27;</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$config</span>-&gt;getValues()[<span class="string">&#x27;test&#x27;</span>];</span><br></pre></td></tr></table></figure>
+
+<p>经过改造后，上面代码将会像你期望那样会输出test。 我们再来看一个例子会让你更迷糊的例子：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Config</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$values</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// using ArrayObject rather than array</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;values = <span class="keyword">new</span> <span class="built_in">ArrayObject</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getValues</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;values;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$config</span> = <span class="keyword">new</span> Config();</span><br><span class="line"></span><br><span class="line"><span class="variable">$config</span>-&gt;getValues()[<span class="string">&#x27;test&#x27;</span>] = <span class="string">&#x27;test&#x27;</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$config</span>-&gt;getValues()[<span class="string">&#x27;test&#x27;</span>];</span><br></pre></td></tr></table></figure>
+
+<p>如果你想的是会和上面一样输出“ Undefined index”错误，那你就错了。代码会正常输出“test”。原因在于PHP对于对象默认就是按引用返回的，而不是按值返回。 综上所述，我们在使用函数返回值时，要弄清楚是值返回还是引用返回。PHP中对于对象，默认是引用返回，数组和内置基本类型默认均按值返回。这个要与其它语言区别开来（很多语言对于数组是引用传递）。 像其它语言，比如java或C#，利用getter或setter来访问或设置类属性是一种更好的方案，当然PHP默认不支持，需要自己实现：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Config</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$values</span> = [];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">setValue</span>(<span class="params"><span class="variable">$key</span>, <span class="variable">$value</span></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;values[<span class="variable">$key</span>] = <span class="variable">$value</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getValue</span>(<span class="params"><span class="variable">$key</span></span>) </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;values[<span class="variable">$key</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$config</span> = <span class="keyword">new</span> Config();</span><br><span class="line"></span><br><span class="line"><span class="variable">$config</span>-&gt;setValue(<span class="string">&#x27;testKey&#x27;</span>, <span class="string">&#x27;testValue&#x27;</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$config</span>-&gt;getValue(<span class="string">&#x27;testKey&#x27;</span>); <span class="comment">// echos &#x27;testValue&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>上面的代码给调用者可以访问或设置数组中的任意值而不用给与数组public访问权限。感觉怎么样:)</p>
+<h2 id="错误4：在循环中执行sql查询"><a href="#错误4：在循环中执行sql查询" class="headerlink" title="错误4：在循环中执行sql查询"></a><strong>错误4：在循环中执行sql查询</strong></h2><p>在PHP编程中发现类似下面的代码并不少见：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$models</span> = [];</span><br><span class="line"></span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$inputValues</span> <span class="keyword">as</span> <span class="variable">$inputValue</span>) &#123;</span><br><span class="line">    <span class="variable">$models</span>[] = <span class="variable">$valueRepository</span>-&gt;findByValue(<span class="variable">$inputValue</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当然上面的代码是没有什么错误的。问题在于我们在迭代过程中<code>$valueRepository-&gt;findByValue()</code>可能每次都执行了sql查询：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$result</span> = <span class="variable">$connection</span>-&gt;query(<span class="string">&quot;SELECT `x`,`y` FROM `values` WHERE `value`=&quot;</span> . <span class="variable">$inputValue</span>);</span><br></pre></td></tr></table></figure>
+
+<p>如果迭代了10000次，那么你就分别执行了10000次sql查询。如果这样的脚本在多线程程序中被调用，那很可能你的系统就挂了。。。 在编写代码过程中，你应该要清楚什么时候应该执行sql查询，尽可能一次sql查询取出所有数据。 有一种业务场景，你很可能会犯上述错误。假设一个表单提交了一系列值（假设为IDs），然后为了取出所有ID对应的数据，代码将遍历IDs，分别对每个ID执行sql查询，代码如下所示：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$data</span> = [];</span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$ids</span> <span class="keyword">as</span> <span class="variable">$id</span>) &#123;</span><br><span class="line">    <span class="variable">$result</span> = <span class="variable">$connection</span>-&gt;query(<span class="string">&quot;SELECT `x`, `y` FROM `values` WHERE `id` = &quot;</span> . <span class="variable">$id</span>);</span><br><span class="line">    <span class="variable">$data</span>[] = <span class="variable">$result</span>-&gt;fetch_row();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但同样的目的可以在一个sql中更加高效的完成，代码如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$data</span> = [];</span><br><span class="line"><span class="keyword">if</span> (count(<span class="variable">$ids</span>)) &#123;</span><br><span class="line">    <span class="variable">$result</span> = <span class="variable">$connection</span>-&gt;query(<span class="string">&quot;SELECT `x`, `y` FROM `values` WHERE `id` IN (&quot;</span> . implode(<span class="string">&#x27;,&#x27;</span>, <span class="variable">$ids</span>));</span><br><span class="line">    <span class="keyword">while</span> (<span class="variable">$row</span> = <span class="variable">$result</span>-&gt;fetch_row()) &#123;</span><br><span class="line">        <span class="variable">$data</span>[] = <span class="variable">$row</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="错误5：内存使用低效和错觉"><a href="#错误5：内存使用低效和错觉" class="headerlink" title="错误5：内存使用低效和错觉"></a>错误5：内存使用低效和错觉</h2><p>一次sql查询获取多条记录比每次查询获取一条记录效率肯定要高，但如果你使用的是php中的mysql扩展，那么一次获取多条记录就很可能会导致内存溢出。 我们可以写代码来实验下（测试环境： 512MB RAM、MySQL、php-cli）：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// connect to mysql</span></span><br><span class="line"><span class="variable">$connection</span> = <span class="keyword">new</span> mysqli(<span class="string">&#x27;localhost&#x27;</span>, <span class="string">&#x27;username&#x27;</span>, <span class="string">&#x27;password&#x27;</span>, <span class="string">&#x27;database&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// create table of 400 columns</span></span><br><span class="line"><span class="variable">$query</span> = <span class="string">&#x27;CREATE TABLE `test`(`id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT&#x27;</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$col</span> = <span class="number">0</span>; <span class="variable">$col</span> &lt; <span class="number">400</span>; <span class="variable">$col</span>++) &#123; </span><br><span class="line">    <span class="variable">$query</span> .= <span class="string">&quot;, `col<span class="subst">$col</span>` CHAR(10) NOT NULL&quot;</span>; </span><br><span class="line">&#125; </span><br><span class="line"><span class="variable">$query</span> .= <span class="string">&#x27;);&#x27;</span>; </span><br><span class="line"><span class="variable">$connection</span>-&gt;query(<span class="variable">$query</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// write 2 million rows</span></span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$row</span> = <span class="number">0</span>; <span class="variable">$row</span> &lt; <span class="number">2000000</span>; <span class="variable">$row</span>++) &#123;</span><br><span class="line">     <span class="variable">$query</span> = <span class="string">&quot;INSERT INTO `test` VALUES (<span class="subst">$row</span>&quot;</span>;</span><br><span class="line">     <span class="keyword">for</span> (<span class="variable">$col</span> = <span class="number">0</span>; <span class="variable">$col</span> &lt; <span class="number">400</span>; <span class="variable">$col</span>++) &#123; </span><br><span class="line">        <span class="variable">$query</span> .= <span class="string">&#x27;, &#x27;</span> . mt_rand(<span class="number">1000000000</span>, <span class="number">9999999999</span>); </span><br><span class="line">     &#125; </span><br><span class="line">     <span class="variable">$query</span> .= <span class="string">&#x27;)&#x27;</span>; </span><br><span class="line">   <span class="variable">$connection</span>-&gt;query(<span class="variable">$query</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在来看看资源消耗：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// connect to mysql</span></span><br><span class="line"><span class="variable">$connection</span> = <span class="keyword">new</span> mysqli(<span class="string">&#x27;localhost&#x27;</span>, <span class="string">&#x27;username&#x27;</span>, <span class="string">&#x27;password&#x27;</span>, <span class="string">&#x27;database&#x27;</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;Before: &quot;</span> . memory_get_peak_usage() . <span class="string">&quot;\n&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="variable">$res</span> = <span class="variable">$connection</span>-&gt;query(<span class="string">&#x27;SELECT `x`,`y` FROM `test` LIMIT 1&#x27;</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;Limit 1: &quot;</span> . memory_get_peak_usage() . <span class="string">&quot;\n&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="variable">$res</span> = <span class="variable">$connection</span>-&gt;query(<span class="string">&#x27;SELECT `x`,`y` FROM `test` LIMIT 10000&#x27;</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;Limit 10000: &quot;</span> . memory_get_peak_usage() . <span class="string">&quot;\n&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>输出结果如下：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Before: <span class="number">224704</span></span><br><span class="line">Limit <span class="number">1</span>: <span class="number">224704</span></span><br><span class="line">Limit <span class="number">10000</span>: <span class="number">224704</span></span><br></pre></td></tr></table></figure>
+
+<p>根据内存使用量来看，貌似一切正常。为了更加确定，试着一次获取100000条记录，结果程序得到如下输出：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PHP Warnin<span class="variable">g:</span> mysqli::query(): (HY000/<span class="number">2013</span>):</span><br><span class="line">Lost connection <span class="keyword">to</span> MySQL server during query in /root/test.php <span class="keyword">on</span> <span class="built_in">line</span> <span class="number">11</span></span><br></pre></td></tr></table></figure>
+
+<p>这是怎么回事呢？ 问 题出在php的mysql模块的工作方式，mysql模块实际上就是libmysqlclient的一个代理。在查询获取多条记录的同时，这些记录会直接 保存在内存中。由于这块内存不属于php的内存模块所管理，所以我们调用memory_get_peak_usage()函数所获得的值并非真实使用内存 值，于是便出现了上面的问题。 我们可以使用mysqlnd来代替mysql，mysqlnd编译为php自身扩展，其内存使用由php内存管理模块所控制。如果我们用mysqlnd来实现上面的代码，则会更加真实的反应内存使用情况：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Before: <span class="number">232048</span></span><br><span class="line">Limit <span class="number">1</span>: <span class="number">324952</span></span><br><span class="line">Limit <span class="number">10000</span>: <span class="number">32572912</span></span><br></pre></td></tr></table></figure>
+
+<p>更加糟糕的是，根据php的官方文档，mysql扩展存储查询数据使用的内存是mysqlnd的两倍，因此原来的代码使用的内存是上面显示的两倍左右。 为了避免此类问题，可以考虑分几次完成查询，减小单次查询数据量：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$totalNumberToFetch</span> = <span class="number">10000</span>;</span><br><span class="line"><span class="variable">$portionSize</span> = <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$i</span> = <span class="number">0</span>; <span class="variable">$i</span> &lt;= ceil(<span class="variable">$totalNumberToFetch</span> / <span class="variable">$portionSize</span>); <span class="variable">$i</span>++) &#123;</span><br><span class="line">    <span class="variable">$limitFrom</span> = <span class="variable">$portionSize</span> * <span class="variable">$i</span>; <span class="variable">$res</span> = <span class="variable">$connection</span>-&gt;query(</span><br><span class="line"><span class="string">&quot;SELECT `x`,`y` FROM `test` LIMIT <span class="subst">$limitFrom</span>, <span class="subst">$portionSize</span>&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>联系上面提到的错误4可以看出，在实际的编码过程中，要做到一种平衡，才能既满足功能要求，又能保证性能。</p>
+<h2 id="错误6：忽略Unicode-UTF-8问题"><a href="#错误6：忽略Unicode-UTF-8问题" class="headerlink" title="错误6：忽略Unicode/UTF-8问题"></a>错误6：忽略Unicode/UTF-8问题</h2><p>php编程中，在处理非ascii字符时，会遇到一些问题，要很小心的去对待，要不然就会错误遍地。举个简单的例子，<code>strlen($name)</code>，如果<code>$name</code>包含非ascii字符，那结果就有些出乎意料。在此给出一些建议，尽量避免此类问题： 如果你对unicode和utf-8不是很了解，那么你至少应该了解一些基础。推荐阅读这篇文章。 最好使用mb_*函数来处理字符串，避免使用老的字符串处理函数。这里要确保PHP的“multibyte”扩展已开启。 数据库和表最好使用unicode编码。 知道<code>jason_code()</code>函数会转换非ascii字符，但<code>serialize()</code>函数不会。 php代码源文件最好使用不含bom的utf-8格式。 在此推荐一篇文章，更详细的介绍了此类问题： UTF-8 Primer for PHP and MySQL</p>
+<h2 id="错误7：假定-POST总是包含POST数据"><a href="#错误7：假定-POST总是包含POST数据" class="headerlink" title="错误7：假定$_POST总是包含POST数据"></a>错误7：假定$_POST总是包含POST数据</h2><p>PHP中的$_POST并非总是包含表单POST提交过来的数据。假设我们通过 jQuery.ajax() 方法向服务器发送了POST请求：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$.ajax(&#123;</span><br><span class="line">    url: <span class="string">&#x27;http://my.site/some/path&#x27;</span>,</span><br><span class="line">    method: <span class="string">&#x27;post&#x27;</span>,</span><br><span class="line">    data: <span class="built_in">JSON</span>.stringify(&#123;<span class="attr">a</span>: <span class="string">&#x27;a&#x27;</span>, <span class="attr">b</span>: <span class="string">&#x27;b&#x27;</span>&#125;),</span><br><span class="line">    contentType: <span class="string">&#x27;application/json&#x27;</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>注意代码中的 contentType: ‘application/json’ ，我们是以json数据格式来发送的数据。在服务端，我们仅输出$_POST数组：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var_dump(<span class="variable">$_POST</span>);</span><br></pre></td></tr></table></figure>
+
+<p>你会很惊奇的发现，结果是下面所示：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">array(<span class="number">0</span>) &#123; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>为什么是这样的结果呢？我们的json数据 {a: ‘a’, b: ‘b’} 哪去了呢？ 答案就是PHP仅仅解析Content-Type为 application/x-www-form-urlencoded 或 multipart/form-data的Http请求。之所以这样是因为历史原因，PHP最初实现$_POST时，最流行的就是上面两种类型。因此虽说现在有些类型（比如application/json）很流行，但PHP中还是没有去实现自动处理。 因为$_POST是全局变量，所以更改$_POST会全局有效。因此对于Content-Type为 application/json 的请求，我们需要手工去解析json数据，然后修改$_POST变量。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$_POST</span> = json_decode(file_get_contents(<span class="string">&#x27;php://input&#x27;</span>), <span class="literal">true</span>);</span><br></pre></td></tr></table></figure>
+
+<p>此时，我们再去输出$_POST变量，则会得到我们期望的输出：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">array</span>(<span class="number">2</span>) &#123; [<span class="string">&quot;a&quot;</span>]=&gt; <span class="keyword">string</span>(<span class="number">1</span>) <span class="string">&quot;a&quot;</span> [<span class="string">&quot;b&quot;</span>]=&gt; <span class="keyword">string</span>(<span class="number">1</span>) <span class="string">&quot;b&quot;</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="错误8：认为PHP支持字符数据类型"><a href="#错误8：认为PHP支持字符数据类型" class="headerlink" title="错误8：认为PHP支持字符数据类型"></a>错误8：认为PHP支持字符数据类型</h2><p>看看下面的代码，猜测下会输出什么：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="variable">$c</span> = <span class="string">&#x27;a&#x27;</span>; <span class="variable">$c</span> &lt;= <span class="string">&#x27;z&#x27;</span>; <span class="variable">$c</span>++) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$c</span> . <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果你的回答是输出’a’到’z’，那么你会惊奇的发现你的回答是错误的。 不错，上面的代码的确会输出’a’到’z’，但除此之外，还会输出’aa’到’yz’。我们来分析下为什么会是这样的结果。 在PHP中不存在char数据类型，只有string类型。明白这点，那么对’z’进行递增操作，结果则为’aa’。对于字符串比较大小，学过C的应该都知道，’aa’是小于’z’的。这也就解释了为何会有上面的输出结果。 如果我们想输出’a’到’z’，下面的实现是一种不错的办法：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="variable">$i</span> = ord(<span class="string">&#x27;a&#x27;</span>); <span class="variable">$i</span> &lt;= ord(<span class="string">&#x27;z&#x27;</span>); <span class="variable">$i</span>++) &#123;</span><br><span class="line">    <span class="keyword">echo</span> chr(<span class="variable">$i</span>) . <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>或者这样也是OK的：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$letters</span> = range(<span class="string">&#x27;a&#x27;</span>, <span class="string">&#x27;z&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$i</span> = <span class="number">0</span>; <span class="variable">$i</span> &lt; count(<span class="variable">$letters</span>); <span class="variable">$i</span>++) &#123; </span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$letters</span>[<span class="variable">$i</span>] . <span class="string">&quot;\n&quot;</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="错误9：忽略编码标准"><a href="#错误9：忽略编码标准" class="headerlink" title="错误9：忽略编码标准"></a>错误9：忽略编码标准</h2><p>虽说忽略编码标准不会导致错误或是bug，但遵循一定的编码标准还是很重要的。 没有统一的编码标准会使你的项目出现很多问题。最明显的就是你的项目代码不具有一致性。更坏的地方在于，你的代码将更加难以调试、扩展和维护。这也就意味着你的团队效率会降低，包括做一些很多无意义的劳动。 对于PHP开发者来说，是比较幸运的。因为有PHP编码标准推荐（PSR），由下面5个部分组成： PSR-0：自动加载标准 PSR-1：基本编码标准 PSR-2：编码风格指南 PSR-3：日志接口标准 PSR-4：自动加载 PSR最初由PHP社区的几个大的团体所创建并遵循。Zend, Drupal, Symfony, Joomla及其它的平台都为此标准做过贡献并遵循这个标准。即使是PEAR，早些年也想让自己成为一个标准，但现在也加入了PSR阵营。 在 某些情况下，使用什么编码标准是无关紧要的，只要你使用一种编码风格并一直坚持使用即可。但是遵循PSR标准不失为一个好办法，除非你有什么特殊的原因要 自己弄一套。现在越来越多的项目都开始使用PSR，大部分的PHP开发者也在使用PSR，因此使用PSR会让新加入你团队的成员更快的熟悉项目，写代码时 也会更加舒适。</p>
+<h2 id="错误10：错误使用empty-函数"><a href="#错误10：错误使用empty-函数" class="headerlink" title="错误10：错误使用empty()函数"></a>错误10：错误使用empty()函数</h2><p>一些PHP开发人员喜欢用empty()函数去对变量或表达式做布尔判断，但在某些情况下会让人很困惑。 首先我们来看看PHP中的数组Array和数组对象ArrayObject。看上去好像没什么区别，都是一样的。真的这样吗？</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// PHP 5.0 or later: </span></span><br><span class="line"><span class="variable">$array</span> = []; </span><br><span class="line">var_dump(<span class="keyword">empty</span>(<span class="variable">$array</span>)); <span class="comment">// outputs bool(true) </span></span><br><span class="line"><span class="variable">$array</span> = <span class="keyword">new</span> <span class="built_in">ArrayObject</span>(); </span><br><span class="line">var_dump(<span class="keyword">empty</span>(<span class="variable">$array</span>)); <span class="comment">// outputs bool(false) </span></span><br><span class="line"><span class="comment">// why don&#x27;t these both produce the same output?</span></span><br></pre></td></tr></table></figure>
+
+<p>让事情变得更复杂些，看看下面的代码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Prior to PHP 5.0: </span></span><br><span class="line"><span class="variable">$array</span> = []; </span><br><span class="line">var_dump(<span class="keyword">empty</span>(<span class="variable">$array</span>)); <span class="comment">// outputs bool(false) </span></span><br><span class="line"><span class="variable">$array</span> = <span class="keyword">new</span> <span class="built_in">ArrayObject</span>(); </span><br><span class="line">var_dump(<span class="keyword">empty</span>(<span class="variable">$array</span>)); <span class="comment">// outputs bool(false)</span></span><br></pre></td></tr></table></figure>
+
+<p>很不幸的是，上面这种方法很受欢迎。例如，在Zend Framework 2中，Zend\Db\TableGateway 在 TableGateway::select() 结果集上调用 current() 方法返回数据集时就是这么干的。开发人员很容易就会踩到这个坑。 为了避免这些问题，检查一个数组是否为空最后的办法是用 count() 函数：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Note that this work in ALL versions of PHP (both pre and post 5.0): </span></span><br><span class="line"><span class="variable">$array</span> = []; </span><br><span class="line">var_dump(count(<span class="variable">$array</span>)); <span class="comment">// outputs int(0) </span></span><br><span class="line"><span class="variable">$array</span> = <span class="keyword">new</span> <span class="built_in">ArrayObject</span>();</span><br><span class="line">var_dump(count(<span class="variable">$array</span>)); <span class="comment">// outputs int(0)</span></span><br></pre></td></tr></table></figure>
+
+<p>在这顺便提一下，因为PHP中会将数值0认为是布尔值false，因此 count() 函数可以直接用在 if 条件语句的条件判断中来判断数组是否为空。另外，count() 函数对于数组来说复杂度为O(1)，因此用 count() 函数是一个明智的选择。 再来看一个用 empty() 函数很危险的例子。当在魔术方法 __get() 中结合使用 empty() 函数时，也是很危险的。我们来定义两个类，每个类都有一个 test 属性。 首先我们定义 Regular 类，有一个 test 属性：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Regular</span> </span>&#123; </span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$test</span> = <span class="string">&#x27;value&#x27;</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后我们定义 Magic 类，并用 __get() 魔术方法来访问它的 test 属性：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Magic</span> </span>&#123; </span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$values</span> = [<span class="string">&#x27;test&#x27;</span> =&gt; <span class="string">&#x27;value&#x27;</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__get</span>(<span class="params"><span class="variable">$key</span></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="keyword">$this</span>-&gt;values[<span class="variable">$key</span>])) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;values[<span class="variable">$key</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>好了。我们现在来看看访问各个类的 test 属性会发生什么：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$regular</span> = <span class="keyword">new</span> Regular();</span><br><span class="line">var_dump(<span class="variable">$regular</span>-&gt;test); <span class="comment">// outputs string(4) &quot;value&quot;</span></span><br><span class="line"><span class="variable">$magic</span> = <span class="keyword">new</span> Magic();</span><br><span class="line">var_dump(<span class="variable">$magic</span>-&gt;test); <span class="comment">// outputs string(4) &quot;value&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>到目前为止，都还是正常的，没有让我们感到迷糊。 但在 test 属性上使用 empty() 函数会怎么样呢？</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">var_dump(<span class="keyword">empty</span>(<span class="variable">$regular</span>-&gt;test)); <span class="comment">// outputs bool(false)</span></span><br><span class="line">var_dump(<span class="keyword">empty</span>(<span class="variable">$magic</span>-&gt;test)); <span class="comment">// outputs bool(true)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果是不是很意外？ 很不幸的是，如果一个类使用魔法 __get() 函数来访问类属性的值，没有简单的方法来检查属性值是否为空或是不存在。在类作用域外，你只能检查是否返回 null 值，但这并不一定意味着没有设置相应的键，因为键值可以被设置为 null 。 相比之下，如果我们访问 Regular 类的一个不存在的属性，则会得到一个类似下面的Notice消息：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Notice: Undefined property: Regular::$nonExistantTest in /path/<span class="keyword">to</span>/test.php <span class="keyword">on</span> <span class="built_in">line</span> <span class="number">10</span></span><br><span class="line"></span><br><span class="line">Call Stack:</span><br><span class="line"><span class="number">0.0012</span> <span class="number">234704</span> <span class="number">1</span>. &#123;main&#125;() /path/<span class="keyword">to</span>/test.php:<span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>因此，对于 <code>empty()</code> 函数，我们要小心的使用，要不然的话就会结果出乎意料，甚至潜在的误导你。 原文地址：<a target="_blank" rel="noopener" href="http://codecloud.net/php-2056.html">http://codecloud.net/php-2056.html</a> By: Eddy 译自：10 Most Common PHP Mistakes</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/PHP/" rel="tag"># PHP</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/2018/02/04/%E5%BC%BA%E7%B1%BB%E5%9E%8B%E3%80%81%E5%BC%B1%E7%B1%BB%E5%9E%8B%E3%80%81%E5%8A%A8%E6%80%81%E8%AF%AD%E8%A8%80%E3%80%81%E9%9D%99%E6%80%81%E8%AF%AD%E8%A8%80%E3%80%81%E5%8A%A8%E6%80%81%E7%B1%BB%E5%9E%8B/" rel="prev" title="强类型、弱类型、动态语言、静态语言、动态类型语言、静态类型语言之Python初探">
+      <i class="fa fa-chevron-left"></i> 强类型、弱类型、动态语言、静态语言、动态类型语言、静态类型语言之Python初探
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/2018/02/05/%E5%86%99%E5%9C%A8%E6%98%A5%E8%8A%82%E5%89%8D%E7%9A%84%E5%B0%8F%E7%BB%93/" rel="next" title="写在春节前的胡扯">
+      写在春节前的胡扯 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF1%EF%BC%9A-foreach-%E5%BE%AA%E7%8E%AF%E5%90%8E%E7%95%99%E4%B8%8B%E6%82%AC%E6%8C%82%E6%8C%87%E9%92%88"><span class="nav-number">1.</span> <span class="nav-text">错误1：&#96;foreach&#96;循环后留下悬挂指针</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%99%E8%AF%AF2%EF%BC%9A%E5%AF%B9isset-%E5%87%BD%E6%95%B0%E8%A1%8C%E4%B8%BA%E7%9A%84%E9%94%99%E8%AF%AF%E7%90%86%E8%A7%A3"><span class="nav-number"></span> <span class="nav-text">错误2：对isset()函数行为的错误理解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%99%E8%AF%AF3%EF%BC%9A%E6%B7%B7%E6%B7%86%E8%BF%94%E5%9B%9E%E5%80%BC%E5%92%8C%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8"><span class="nav-number"></span> <span class="nav-text">错误3：混淆返回值和返回引用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%99%E8%AF%AF4%EF%BC%9A%E5%9C%A8%E5%BE%AA%E7%8E%AF%E4%B8%AD%E6%89%A7%E8%A1%8Csql%E6%9F%A5%E8%AF%A2"><span class="nav-number"></span> <span class="nav-text">错误4：在循环中执行sql查询</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%99%E8%AF%AF5%EF%BC%9A%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8%E4%BD%8E%E6%95%88%E5%92%8C%E9%94%99%E8%A7%89"><span class="nav-number"></span> <span class="nav-text">错误5：内存使用低效和错觉</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%99%E8%AF%AF6%EF%BC%9A%E5%BF%BD%E7%95%A5Unicode-UTF-8%E9%97%AE%E9%A2%98"><span class="nav-number"></span> <span class="nav-text">错误6：忽略Unicode&#x2F;UTF-8问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%99%E8%AF%AF7%EF%BC%9A%E5%81%87%E5%AE%9A-POST%E6%80%BB%E6%98%AF%E5%8C%85%E5%90%ABPOST%E6%95%B0%E6%8D%AE"><span class="nav-number"></span> <span class="nav-text">错误7：假定$_POST总是包含POST数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%99%E8%AF%AF8%EF%BC%9A%E8%AE%A4%E4%B8%BAPHP%E6%94%AF%E6%8C%81%E5%AD%97%E7%AC%A6%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number"></span> <span class="nav-text">错误8：认为PHP支持字符数据类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%99%E8%AF%AF9%EF%BC%9A%E5%BF%BD%E7%95%A5%E7%BC%96%E7%A0%81%E6%A0%87%E5%87%86"><span class="nav-number"></span> <span class="nav-text">错误9：忽略编码标准</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%99%E8%AF%AF10%EF%BC%9A%E9%94%99%E8%AF%AF%E4%BD%BF%E7%94%A8empty-%E5%87%BD%E6%95%B0"><span class="nav-number"></span> <span class="nav-text">错误10：错误使用empty()函数</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Chengfeng</p>
+  <div class="site-description" itemprop="description">生活的点点滴滴</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Chengfeng</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
