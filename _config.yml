@@ -106,3 +106,5 @@ deploy:
   type: git
   repo: git@self:zhuochengwo/blog.git
   branch: main
+  name: zhuochengwo
+  email: drondyw@gmail.com

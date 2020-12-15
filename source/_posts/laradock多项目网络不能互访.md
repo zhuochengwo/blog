@@ -24,7 +24,7 @@ cURL error 7: Failed to connect to bbb.dev port 80: Connection refused
 
 一开始找到的方案都是通过添加`php-fpm`中`extra_hosts`的配置来实现的，这种方案比较麻烦，配置好后还需要需要`rebuild` `wordspace`和`php-fpm`两个容器，这里主要介绍一种更加简单的方法。 找到`docker-compose.yml`中`nginx`配置 原`nginx`中`networks`配置如下：
 
-```vim
+```dockerfile
 networks:
         - frontend
         - backend
@@ -32,7 +32,7 @@ networks:
 
 将其修改为:
 
-```vim
+```dockerfile
 networks:
         frontend:
          aliases:
@@ -44,7 +44,7 @@ networks:
 
 此配置是运行时配置，不需要`rebulid`，执行`docker-compose up -d nginx`会`recreate`容器，配置就能生效 `nginx`模块完整配置如下
 
-```vim
+```dockerfile
 ### NGINX Server #########################################
     nginx:
       build:

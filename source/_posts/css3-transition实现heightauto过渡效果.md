@@ -10,11 +10,11 @@ categories:
 date: 2018-08-13 12:15:47
 ---
 
-在看w3schools的[CSS Dropdowns](https://www.w3schools.com/css/css_dropdowns.asp)章节的时候，想着给下拉列表加上个过渡动画效果会更好，实际试了下，发现直接`height:auto`好像还实现不了，找了下，可以通过`max-height`的方式来实现。 想要实现的效果如下，在鼠标移动到`dropdown`上时过渡出现下拉列表，这个时候容器的height是不固定的，也是未知的，因为里边的`item`未知。想当然的想到`height:auto`，但发现`transition`效果没有预期出现，这主要是`transition`实现机制的问题。这里用max-height来实现，将`max-height`在`hover`时设置成一个肯定能大于`height`的值即可。
+在看w3schools的[CSS Dropdowns](https://www.w3schools.com/css/css_dropdowns.asp)章节的时候，想着给下拉列表加上个过渡动画效果会更好，实际试了下，发现直接`height:auto`好像还实现不了，找了下，可以通过`max-height`的方式来实现。 想要实现的效果如下，在鼠标移动到`dropdown`上时过渡出现下拉列表，这个时候容器的height是不固定的，也是未知的，因为里边的`item`未知。想当然的想到`height:auto`，但发现`transition`效果没有预期出现，这主要是`transition`实现机制的问题。需要用`max-height`来实现，将`max-height`在`hover`时设置成一个肯定能大于`height`的值即可。
 
 ### 完整代码如下:
 
-```markup
+```html
 <!DOCTYPE html>
 <html>
 <head>

@@ -98,7 +98,7 @@ sudo logrotate -f /etc/logrotate.d/shadowsocks
 cat /etc/cron.daily/logrotate 
 ```
 
-```vim
+```bash
 #!/bin/sh
 
 # Clean non existent log file entries from status file
@@ -114,3 +114,4 @@ mv status.clean status
 test -x /usr/sbin/logrotate  exit 0
 /usr/sbin/logrotate /etc/logrotate.conf
 ```
+

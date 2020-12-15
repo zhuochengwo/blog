@@ -130,4 +130,4 @@ try {
 }
 ```
 
-`$res->getGraphUser()` 就会获取到所需的用户信息，这里的信息可以在接口参数中指定，具体可以查看相关[接口文档](https://developers.facebook.com/docs/graph-api/reference/v2.6/user) 到这里，整个流程基本上就处理完了。 相关文章： [Google第三方登录](https://chengfeng.site/2019/01/29/google%E7%AC%AC%E4%B8%89%E6%96%B9%E7%99%BB%E5%BD%95%E5%AE%9E%E7%8E%B0web%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB/) [Twitter第三方登录](https://chengfeng.site/2019/01/30/twitter%E7%AC%AC%E4%B8%89%E6%96%B9%E7%99%BB%E5%BD%95web%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB/)
+`$res->getGraphUser()` 就会获取到所需的用户信息，这里的信息可以在接口参数中指定，具体可以查看相关[接口文档](https://developers.facebook.com/docs/graph-api/reference/v2.6/user) 到这里，整个流程基本上就处理完了。

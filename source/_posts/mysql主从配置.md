@@ -14,13 +14,13 @@ date: 2018-04-14 11:31:39
 vim /etc/my.cnf
 ```
 
-\***\[必须\]启用二进制日志**
+- **\[必须\]启用二进制日志**
 
 ```vim
 og-bin=mysql-bin
 ```
 
-**\*\[必须\]服务器唯一ID，默认是1，一般取IP最后一段** 
+- **\[必须\]服务器唯一ID，默认是1，一般取IP最后一段** 
 
 ```vim
 server-id=151
@@ -32,13 +32,13 @@ server-id=151
 vim /etc/my.cnf
 ```
 
-\***\[可选\]启用二进制日志**
+- **\[可选\]启用二进制日志**
 
 ```vim
 log-bin=mysql-bin
 ```
 
-\***\[必须\]服务器唯一ID，默认是1，一般取IP最后一段**
+- **\[必须\]服务器唯一ID，默认是1，一般取IP最后一段**
 
 ```vim
 server-id=152
@@ -50,7 +50,7 @@ server-id=152
 mysql -uroot -ppassword -e "GRANT REPLICATION SLAVE,RELOAD,SUPER ON *.* TO 'backup'@'192.168.0.154' IDENTIFIED BY '123456';"
 ```
 
-\***查询master(主服务器)的状态**
+- **查询master(主服务器)的状态**
 
 ```bash
 mysql -uroot -ppassword -e "show master status;"
@@ -58,7 +58,7 @@ mysql -uroot -ppassword -e "show master status;"
 
 ## 四、配置Slave启动主从复制
 
-\***注意不要断开，154数字前后无单引号。** \***启动从服务器复制功能**
+- **注意不要断开，154数字前后无单引号。** \***启动从服务器复制功能**
 
 ```bash
 mysql -uroot -ppassword -e "change master to master_host='192.168.0.151',master_user='backup',master_password='123456',master_log_file='mysql-bin.000001',master_log_pos=154; start slave;"

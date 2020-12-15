@@ -24,7 +24,7 @@ date: 2019-01-29 16:31:48
 
 修改`meta`中的`YOUR_CLIENT_ID`为申请的应用的`Client ID`，这样就可以获取到我们需要的`id_token`了，将`id_token`以请求参数传递给后端验证就可以完成整个登录流程了。如果需要的话，我们也可以直接在前端获取到`access_token`。下边代码会打印`id_token`和`access_token`，可以在控制台查看。
 
-```markup
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -67,4 +67,4 @@ if ($payload) {
 }
 ```
 
-其它语言实现可参考[官方文档](https://developers.google.com/identity/sign-in/web/backend-auth) 这样就非常简单的完成了google第三方登录的流程。 如果还有其它不清楚的地方，可以查看[官方文档](https://developers.google.com/identity/sign-in/web/backend-auth)的说明，相对来说，google的文档还是比较简单清晰的。 相关文章： [Facebook第三方登录](https://chengfeng.site/2019/01/31/facebook%E7%AC%AC%E4%B8%89%E6%96%B9%E7%99%BB%E5%BD%95web%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB/) [Twitter第三方登录](https://chengfeng.site/2019/01/30/twitter%E7%AC%AC%E4%B8%89%E6%96%B9%E7%99%BB%E5%BD%95web%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB/)
+其它语言实现可参考[官方文档](https://developers.google.com/identity/sign-in/web/backend-auth) 这样就非常简单的完成了google第三方登录的流程。 如果还有其它不清楚的地方，可以查看[官方文档](https://developers.google.com/identity/sign-in/web/backend-auth)的说明，相对来说，google的文档还是比较简单清晰的。 
