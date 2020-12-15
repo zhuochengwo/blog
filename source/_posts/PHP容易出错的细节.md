@@ -63,7 +63,7 @@ if (!isset($data['keyShouldBeSet']) {
 }
 ```
 
-写这段代码的人本意可能是如果`$data[‘keyShouldBeSet’]`未设置，则执行对应逻辑。但问题在于即使`$data[‘keyShouldBeSet’]`已设置，但设置的值为`null`，还是会执行对应的逻辑，这就不符合代码的本意了。 下面是另外一个例子：
+写这段代码的人本意可能是如果`$data['keyShouldBeSet']`未设置，则执行对应逻辑。但问题在于即使`$data['keyShouldBeSet']`已设置，但设置的值为`null`，还是会执行对应的逻辑，这就不符合代码的本意了。 下面是另外一个例子：
 
 ```php
 if ($_POST['active']) {
@@ -77,7 +77,7 @@ if (!isset($postData)) {
 }
 ```
 
-上 面的代码假设`$_POST[‘active’]`为真，那么`$postData`应该被设置，因此`isset($postData)`会返回`true`。反之，上 面代码假设`isset($postData)`返回false的唯一途径就是`$_POST[‘active’]`也返回false。 真是这样吗？当然不是！ 即使`$_POST[‘active’]`返回`true`，`$postData`也有可能被设置为`null`，这时`isset($postData)`就会返回`false`。这就不符合代码的本意了。 如果上面代码的本意仅是检测`$_POST[‘active’]`是否为真，下面这样实现会更好：
+上 面的代码假设`$_POST['active']`为真，那么`$postData`应该被设置，因此`isset($postData)`会返回`true`。反之，上 面代码假设`isset($postData)`返回false的唯一途径就是`$_POST['active']`也返回false。 真是这样吗？当然不是！ 即使`$_POST['active']`返回`true`，`$postData`也有可能被设置为`null`，这时`isset($postData)`就会返回`false`。这就不符合代码的本意了。 如果上面代码的本意仅是检测`$_POST['active']`是否为真，下面这样实现会更好：
 
 ```php
 if ($_POST['active']) {

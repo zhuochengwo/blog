@@ -84,4 +84,4 @@ list items:true
 ➜  tools git:(master) ✗
 ```
 
-当然这只是个简单示例，实际功能相当强大，支持非常多的高级功能，具体还需要根据自己需求参考官方文档实践。 对比之前用的python的getopt，commder.js实在是好用太多，直观明了。 Options.help()能自动输出文档，这是一个非常棒的功能，而且能自定义内容，option的第三个参数支持自定义函数。 需要注意的是，要获取值必须使用类似这样的方式option('-n,--num ', 'num')，其中表示必填参数，没有传入的情况下会报错，如上面结果输出的error: option \`-n,--num ' argument missing，如果改用\[n\]则代表选填参数。类似option('-l,--list', 'list items')，标示默认获取的是bool值
+当然这只是个简单示例，实际功能相当强大，支持非常多的高级功能，具体还需要根据自己需求参考官方文档实践。 对比之前用的python的getopt，commder.js实在是好用太多，直观明了。 `Options.help()`能自动输出文档，这是一个非常棒的功能，而且能自定义内容，option的第三个参数支持自定义函数。 需要注意的是，要获取值必须使用类似这样的方式`option('-n,--num ', 'num')`，其中表示必填参数，没有传入的情况下会报错，如上面结果输出的`error: option -n,--num ' argument missing`，如果改用\[n\]则代表选填参数。类似`option('-l,--list', 'list items')`，标示默认获取的是bool值
